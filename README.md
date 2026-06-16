@@ -7,6 +7,13 @@ This project has just passed the POC phase, and is documented as such.
 * 2.1 [Basic structure](#21-basic-structure-of-system)
 * 2.2 [Tag configuration](#22-tag-configuration)
 3. [Repository Structure](#3-repository-structure)
+* 3.1 Game code for POC
+    * Base of game
+    * Ghost dispelling mechanic & button input
+    * Winning condition
+    * Lose condition
+    * Synchronised SFX with Multiplay
+    * Tutorial
 
 
 
