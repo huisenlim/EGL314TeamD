@@ -30,5 +30,14 @@ def c1():
     send_message(PI_A_ADDR, PORT, mkr7, msg)
     send_message(PI_A_ADDR, PORT, play, msg)
 	
+def c2():
+    send_message(PI_A_ADDR, PORT, mkr8, msg)
+    send_message(PI_A_ADDR, PORT, play, msg)
 
 c1()
+time.sleep(20)
+send_message(PI_A_ADDR, PORT, pause, msg)
+time.sleep(5)
+c2()
+time.sleep(5)
+send_message(PI_A_ADDR, PORT, pause, msg)
