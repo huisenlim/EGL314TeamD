@@ -45,7 +45,7 @@ B --OSC--> H[Multiplay]
 ```
 ### Physical Setup
 BU03 Anchors and Tags
-![setupimg](BU03setup.JPG)
+![setupimg](.\images\BU03setup.JPG)
 
 ### 2.2 Tag configuration
 
