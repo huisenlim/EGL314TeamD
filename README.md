@@ -15,8 +15,9 @@ This project has just passed the POC phase, and is documented as such.
     * [Ghost dispelling mechanic](#ghost-dispelling-mechanic)
     * [Winning condition](#win-condition)
     * [Lose condition](#lose-condition)
-    * [Synchronised SFX with Multiplay and Python OSC](#synchronised-sfx-using-multiplay-and-python-osc)  
+    * [Proximity beeping mechanic](#proximity-beeping-mechanic)  
 * 3.2 [Tutorial](Tutorial.md)
+* 3.3 [UART data receiver file](uart.py)
 
 
 
@@ -96,7 +97,31 @@ Ghosts = [
     },
 ]
 ```   
+
+```python
+def ptInGhost(point, ghost):
+    if point is None:
+        return False
+    px, py = point
+    zx, zy = ghost["center"]
+    r = ghost["radius"] + GhostHitTol
+    dx = px - zx
+    dy = py - zy
+    return (dx * dx + dy * dy) <= (r * r)
+```
+Determines where tag is from ghost
+
+
 ### Rapberry Pi button input 
+This game requires a button input to create the ghost dispelling mechanic.   
+For that, first install the Rasberry Pi GPIO:
+```
+pip install RPi.GPIO==0.7.1
+```
+Then import the library into the game file code:
+```python
+import RPi.GPIO as GPIO
+```
 
 ### Ghost dispelling mechanic
 
@@ -104,10 +129,73 @@ Ghosts = [
 For the player to win, they must first carry a tag and the button.  
 The player must both be in the vicinity of the ghost and press the button to dispel the ghost.  
 Clear all three ghosts within the alloted time to win.
+
 ### Lose Condition
-For the player to lose, player must carry a tag and a button.
-The game starts with a 120-second countdown timer.
-Each time the player successfully dispels a ghost by pressing the correct button while inside the correct zone, 30 seconds are added to the remaining time.
-If the player attempts to dispel a ghost incorrectly (for example, pressing the wrong button or pressing outside the designated zone), 5 seconds are deducted from the remaining time.
-The player loses when the countdown timer reaches 0 seconds before all ghosts are dispelled.
-### Synchronised SFX using Multiplay and Python OSC
+The game starts with a 120-second countdown timer.  
+Each time the player successfully dispels a ghost by pressing the correct button while inside the correct zone, 30 seconds are added to the remaining time.  
+If the player attempts to dispel a ghost outside the designated zone, 5 seconds are deducted from the remaining time.  
+The player will lose when the countdown timer reaches 0 seconds before all ghosts are dispelled.
+
+### Proximity beeping mechanic
+In order for players to decipher where ghosts are without a screen explicitly showing where the ghosts are, sound cues are added in order to hint at the location of the ghosts. 
+   
+4 different levels of beeping ranging in frequency will play depending on the distance of the player tag from the nearest ghost.   
+  
+The faster the beeping, the closer the player is. Multiplay and Python OSC will be used to facilitate this mechanic in order for it to be synchronised with the game.
+
+```python
+MULTIPLAY_IP   = "192.168.254.173"   # IP of the Multiplay machine
+MULTIPLAY_PORT = 5005                # OSC UDP port Multiplay listens on
+```
+
+```python
+SOUND_CUE_THRESHOLDS = [
+    (0.0,   "/cue/4/go"),   # right on the ghost  (hit tolerance)
+    (0.25,  "/cue/3/go"),   # very close
+    (0.625, "/cue/2/go"),   # medium range
+    (1.0,   "/cue/1/go"),   # far away
+]
+```
+
+Return the minimum distance from point to any active ghost centre.
+```python
+def nearest_ghost_distance(point):
+    active = [g for g in Ghosts if g.get("active", True)]
+    if not active:
+        return float("inf")
+    return min(dist_to_ghost(point, g) for g in active)
+```
+
+```python
+class MultiplayClient:
+    def __init__(self, ip: str, port: int):
+        self._client = SimpleUDPClient(ip, port)
+        print(f"[multiplay] OSC client initialised → {ip}:{port}")
+```
+Thin wrapper around pythonosc SimpleUDPClient for triggering Multiplay cues.  
+One shared instance is created at startup and re-used across all tags.  
+Thread-safe: SimpleUDPClient.send_message() is stateless per call.  
+
+```python
+    def stop_all(self):
+        try:
+            self._client.send_message("/cue/all/stop", [])
+            print("[multiplay] all cues stopped")
+        except Exception as exc:
+            print(f"[multiplay] stop_all failed: {exc}")
+```
+Stop every currently active cue in Multiplay (/cue/all/stop).
+
+```python
+    def trigger(self, address: str):
+        try:
+            self._client.send_message("/cue/all/stop", [])
+            self._client.send_message(address, [])
+            print(f"[multiplay] stopped all → cue sent: {address}")
+        except Exception as exc:
+            print(f"[multiplay] send failed ({address}): {exc}")
+```
+
+Stop all active cues, then immediately fire the requested cue.  
+Stopping first guarantees no two proximity cues ever overlap, regardless of how Multiplay's own looping or auto-follow is configured.
+ 
