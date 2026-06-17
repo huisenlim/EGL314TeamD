@@ -1,6 +1,8 @@
 # EGL314 Experiental Ghost Hunting Game: POC
 This contains the documentation of our experiential ghost hunting game utilising the **Ai-Thinker BU03-Kit** UWB modules (DW3000 + STM32F103) for live player tracking.  
 This project has just passed the POC phase, and is documented as such.
+
+
 ## Table of Contents
 1. [Project Overview](#1-Project-Overview)
 2. [System Structure & Setup](#2-system-structure--setup)
@@ -9,11 +11,12 @@ This project has just passed the POC phase, and is documented as such.
 3. [Repository Structure](#3-repository-structure)
 * 3.1 [Game code for POC](#31-poc-game-code)
     * [Base of game](#base-game)
-    * [Ghost dispelling mechanic & button input](#ghost-dispelling-mechanic--button-input)
+    * [Button input](#rapberry-pi-button-input)
+    * [Ghost dispelling mechanic](#ghost-dispelling-mechanic)
     * [Winning condition](#win-condition)
     * [Lose condition](#lose-condition)
-    * [Synchronised SFX with Multiplay and Python OSC](#synchronised-sfx-using-multiplay-and-python-osc)
-    * [Tutorial](#sequential-tutorial)
+    * [Synchronised SFX with Multiplay and Python OSC](#synchronised-sfx-using-multiplay-and-python-osc)  
+* 3.2 [Tutorial](Tutorial.md)
 
 
 
@@ -60,10 +63,11 @@ BU03 Anchors and Tags
 
 ## 3. Repository Structure
 ### 3.1 POC game code
-The game code for POC includes the base game mechanic of dispelling ghosts with the tag and button, win/lose condition, synchronised SFX using Multiplay, and a sequential tutorial.  
+The programming of the game for POC includes the base game mechanic of dispelling ghosts with the tag and button, win/lose condition, synchronised SFX using Multiplay, and a [sequential tutorial](Tutorial.md).  
 
 ### Base game  
-The game consists of three ghosts.
+The game consists of three ghosts.  
+The information for each ghost is stored as a **dictionary** within a **list**, named 'Ghosts' as follows:
 ```python
 Ghosts = [
     {
@@ -92,86 +96,14 @@ Ghosts = [
     },
 ]
 ```   
-### Ghost dispelling mechanic & button input
-### Button Input
-Setting up physical button onto Raspberry Pi
-```python
-import RPi.GPIO as GPIO
-import time
+### Rapberry Pi button input 
 
-# -------------------------------
-# GPIO SETUP
-# -------------------------------
-button_pin = 27   # Button connected to GPIO27
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-# Ghost counter
-ghost_number = 1
-ghost_alive = True
-
-try:
-    print("Game Started!")
-    print("Press the button to dispel ghosts!\n")
-
-    while True:
-
-        # Spawn new ghost if none exists
-        if not ghost_alive:
-            ghost_number += 1
-
-            print(f"\nA new Ghost #{ghost_number} has appeared!")
-            ghost_alive = True
-
-            time.sleep(2)
-
-        # -------------------------------
-        # BUTTON PRESS DETECTED
-        # -------------------------------
-        if GPIO.input(button_pin) == False:
-
-            if ghost_alive:
-
-                print("\n=== BUTTON INPUT DETECTED ===")
-                print(f"Dispelling Ghost #{ghost_number}...")
-                
-                time.sleep(1)
-
-                print(f"Ghost #{ghost_number} Dispelled!")
-                print("Area Cleared!")
-
-                ghost_alive = False
-
-            # Wait until button released
-            while GPIO.input(button_pin) == False:
-                time.sleep(0.1)
-
-            # Debounce
-            time.sleep(0.3)
-
-        else:
-
-            if ghost_alive:
-                print(f"Ghost #{ghost_number} is haunting...")
-            
-            time.sleep(1)
-
-except KeyboardInterrupt:
-    print("\nProgram stopped")
-
-finally:
-    GPIO.cleanup()
-
-
-
-```
-
+### Ghost dispelling mechanic
 
 ### Win Condition
-For the player to win, player must carry a tag and a button.
-Player must be in the zone "ghosts" and pressed the button to dispell the ghosts.
-Clear all ghosts to win.
+For the player to win, they must first carry a tag and the button.  
+The player must both be in the vicinity of the ghost and press the button to dispel the ghost.  
+Clear all three ghosts within the alloted time to win.
 ### Lose Condition
 For the player to lose, player must carry a tag and a button.
 The game starts with a 120-second countdown timer.
@@ -179,4 +111,3 @@ Each time the player successfully dispels a ghost by pressing the correct button
 If the player attempts to dispel a ghost incorrectly (for example, pressing the wrong button or pressing outside the designated zone), 5 seconds are deducted from the remaining time.
 The player loses when the countdown timer reaches 0 seconds before all ghosts are dispelled.
 ### Synchronised SFX using Multiplay and Python OSC
-### Sequential tutorial

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 game.py  —  OSC Receiver + Trilateration + Kalman Filter + Visualizer
 ======================================================================
