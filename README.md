@@ -2,7 +2,7 @@
 This contains the documentation of our experiential ghost hunting game utilising the **Ai-Thinker BU03-Kit** UWB modules (DW3000 + STM32F103) for live player tracking.  
 This project has just passed the POC phase, and is documented as such.
 ## Table of Contents
-1. [Project Overview](#Project-Overview)
+1. [Project Overview](#1-Project-Overview)
 2. [System Structure & Setup](#2-system-structure--setup)
 * 2.1 [Basic structure](#21-basic-structure-of-system)
 * 2.2 [Tag configuration](#22-tag-configuration)
