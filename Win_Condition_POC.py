@@ -50,7 +50,7 @@ GhostHitTol = 0.0  # hit tolerance
 
 Ghosts = [
     {
-        "center": (0.25, 0.5),
+        "center": (0.25, 0.625),
         "radius": 0.15,
         "min_radius": 0.10,
         "color": "#ffff00",
@@ -63,6 +63,14 @@ Ghosts = [
         "min_radius": 0.10,
         "color": "#fff700",
         "label": "Stewart",
+        "active": True,
+    },
+    {
+        "center": (0.75, 0.25),
+        "radius": 0.15,
+        "min_radius": 0.10,
+        "color": "#fff700",
+        "label": "Kevin",
         "active": True,
     },
 ]
@@ -360,7 +368,7 @@ class ViewerApp:
             try: root.attributes("-fullscreen", True)
             except tk.TclError: pass
 
-        self.root.after(100, self.update_loop)
+        self.root.after(30, self.update_loop)
 
     def update_loop(self):
         if self.state.stop:
