@@ -60,7 +60,7 @@ GhostHitTol = 0.0 #hit tolerance
 
 Ghosts = [
     {
-        "center": (0.25, 0.5),
+        "center": (0.25, 0.625),
         "radius": 0.15,
         "min_radius": 0.10,
         "color": "#ffff00",
@@ -68,11 +68,19 @@ Ghosts = [
         "active": True,
     },
     {
-        "center": (0.75, 1),
+        "center": (0.75, 1.0),
         "radius": 0.15,
         "min_radius": 0.10,
         "color": "#fff700",
         "label": "Stewart",
+        "active": True,
+    },
+    {
+        "center": (0.75, 0.25),
+        "radius": 0.15,
+        "min_radius": 0.10,
+        "color": "#fff700",
+        "label": "Kevin",
         "active": True,
     },
 ]
