@@ -65,6 +65,18 @@ The game code for POC includes the base game mechanic of dispelling ghosts with 
 ### Base game  
 writing goes here   
 ### Ghost dispelling mechanic & button input
+Creating of ghosts "zone"
+```python
+Ghosts = [
+    {
+        "center": (0.25, 0.625),
+        "radius": 0.15,
+        "min_radius": 0.10,
+        "color": "#ffff00",
+        "label": "Bob",
+        "active": True,
+    },
+]
 ### Win Condition
 ### Lose Condition
 ### Synchronised SFX using Multiplay and Python OSC
