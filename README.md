@@ -124,11 +124,12 @@ import RPi.GPIO as GPIO
 ```
 
 ### Ghost dispelling mechanic
+When Player is in the zone where the ghosts is and when button is pressed, ghosts will be dispelled.
 
 ### Win Condition
 For the player to win, they must first carry a tag and the button.  
 The player must both be in the vicinity of the ghost and press the button to dispel the ghost.  
-Clear all three ghosts within the alloted time to win.
+Clear all three ghosts within the allocated time to win.
 
 ### Lose Condition
 The game starts with a 120-second countdown timer.  
