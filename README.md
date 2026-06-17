@@ -7,13 +7,13 @@ This project has just passed the POC phase, and is documented as such.
 * 2.1 [Basic structure](#21-basic-structure-of-system)
 * 2.2 [Tag configuration](#22-tag-configuration)
 3. [Repository Structure](#3-repository-structure)
-* 3.1 Game code for POC
-    * Base of game
-    * Ghost dispelling mechanic & button input
-    * Winning condition
-    * Lose condition
-    * Synchronised SFX with Multiplay
-    * Tutorial
+* 3.1 [Game code for POC](#31-poc-game-code)
+    * [Base of game](#base-game)
+    * [Ghost dispelling mechanic & button input](#ghost-dispelling-mechanic--button-input)
+    * [Winning condition](#win-condition)
+    * [Lose condition](#lose-condition)
+    * [Synchronised SFX with Multiplay and Python OSC](#synchronised-sfx-using-multiplay-and-python-osc)
+    * [Tutorial](#sequential-tutorial)
 
 
 
@@ -58,3 +58,13 @@ BU03 Anchors and Tags
 
 
 ## 3. Repository Structure
+### 3.1 POC game code
+The game code for POC includes the base game mechanic of dispelling ghosts with the tag and button, win/lose condition, synchronised SFX using Multiplay, and a sequential tutorial.  
+
+### Base game  
+writing goes here   
+### Ghost dispelling mechanic & button input
+### Win Condition
+### Lose Condition
+### Synchronised SFX using Multiplay and Python OSC
+### Sequential tutorial
