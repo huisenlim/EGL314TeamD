@@ -100,5 +100,10 @@ For the player to win, player must carry a tag and a button.
 Player must be in the zone "ghosts" and pressed the button to dispell the ghosts.
 Clear all ghosts to win.
 ### Lose Condition
+For the player to lose, player must carry a tag and a button.
+The game starts with a 120-second countdown timer.
+Each time the player successfully dispels a ghost by pressing the correct button while inside the correct zone, 30 seconds are added to the remaining time.
+If the player attempts to dispel a ghost incorrectly (for example, pressing the wrong button or pressing outside the designated zone), 5 seconds are deducted from the remaining time.
+The player loses when the countdown timer reaches 0 seconds before all ghosts are dispelled.
 ### Synchronised SFX using Multiplay and Python OSC
 ### Sequential tutorial
