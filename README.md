@@ -48,7 +48,8 @@ D[BU03 Anchor 2] --> A
 E[BU03 Anchor 3] --> A
 F[BU03 Anchor 4] --> A
 G[BU03 Anchor 5] --> A
-B --OSC--> H[Multiplay]
+B --OSC--> H[Game rPi]
+H --OSC--> I[Multiplay]
 ```
 ### Physical Setup
 BU03 Anchors and Tags
