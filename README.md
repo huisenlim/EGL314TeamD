@@ -63,9 +63,7 @@ BU03 Anchors and Tags
 The game code for POC includes the base game mechanic of dispelling ghosts with the tag and button, win/lose condition, synchronised SFX using Multiplay, and a sequential tutorial.  
 
 ### Base game  
-writing goes here   
-### Ghost dispelling mechanic & button input
-Creating of 3 ghosts "zone". 
+Creation of 3 ghosts "zone". 
 ```python
 Ghosts = [
     {
@@ -93,7 +91,9 @@ Ghosts = [
         "active": True,
     },
 ]
-```
+```   
+### Ghost dispelling mechanic & button input
+
 
 ### Win Condition
 For the player to win, player must carry a tag and a button.
