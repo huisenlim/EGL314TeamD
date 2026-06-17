@@ -77,6 +77,8 @@ Ghosts = [
         "active": True,
     },
 ]
+```
+
 ### Win Condition
 ### Lose Condition
 ### Synchronised SFX using Multiplay and Python OSC
