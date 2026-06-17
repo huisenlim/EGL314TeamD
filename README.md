@@ -65,7 +65,7 @@ The game code for POC includes the base game mechanic of dispelling ghosts with 
 ### Base game  
 writing goes here   
 ### Ghost dispelling mechanic & button input
-Creating of ghosts "zone"
+Creating of 3 ghosts "zone". 
 ```python
 Ghosts = [
     {
@@ -76,10 +76,29 @@ Ghosts = [
         "label": "Bob",
         "active": True,
     },
+    {
+        "center": (0.75, 1.0),
+        "radius": 0.15,
+        "min_radius": 0.10,
+        "color": "#fff700",
+        "label": "Stewart",
+        "active": True,
+    },
+    {
+        "center": (0.75, 0.25),
+        "radius": 0.15,
+        "min_radius": 0.10,
+        "color": "#fff700",
+        "label": "Kevin",
+        "active": True,
+    },
 ]
 ```
 
 ### Win Condition
+For the player to win, player must carry a tag and a button.
+Player must be in the zone "ghosts" and pressed the button to dispell the ghosts.
+Clear all ghosts to win.
 ### Lose Condition
 ### Synchronised SFX using Multiplay and Python OSC
 ### Sequential tutorial
