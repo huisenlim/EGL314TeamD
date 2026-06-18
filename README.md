@@ -131,6 +131,54 @@ Then import the library into the game file code:
 import RPi.GPIO as GPIO
 ```
 
+
+
+
+
+### 1. Pin Declaration & GPIO Setup
+
+```python
+BUTTON_PIN = 27
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+```
+
+This sets GPIO pin 27 as an input with an internal pull-up resistor, meaning the pin reads HIGH normally and goes LOW when the button is pressed.
+
+---
+
+### 2. The Callback Function
+
+```python
+def pin_edge_callback(channel):
+    is_pressed = not GPIO.input(channel)
+    with state.lock:
+        state.button_pressed = is_pressed
+        ...
+```
+
+This function runs automatically whenever the button is pressed or released. `not GPIO.input(channel)` flips the logic — since the pin is pull-up, a LOW signal (button pressed) becomes `True`.
+
+---
+
+### 3. Edge Detection Registration
+
+```python
+GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=pin_edge_callback, bouncetime=200)
+```
+
+This is what actually "listens" for the button. `GPIO.FALLING` means it triggers on the HIGH→LOW transition (i.e. the moment the button is pressed down). The `bouncetime=200` is a 200ms debounce filter to prevent a single press from firing multiple times.
+
+---
+
+### 4. Cleanup on Exit
+
+```python
+GPIO.cleanup()
+```
+
+At the very end in the `finally` block, this releases the GPIO pins safely when the program closes.
+
 ### Ghost Dispelling Mechanic
 When Player is in the vicinity of a ghost and presses the button, the ghost will be dispelled.  
 
