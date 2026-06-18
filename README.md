@@ -209,7 +209,7 @@ For the player to win, they must first carry the BU03 tag and button.
 The player must both be in the vicinity of the ghost and press the button to dispel the ghost.  
 Clear all three ghosts within the allocated time to win.
 
-Firstly, identify if tag is in the zone of the ghosts.
+Firstly, the game matrix identifies if the tag is in the ghost zone.
 ```python
 for zi, ghost in enumerate(Ghosts):
                     if ghost.get("active", True):
@@ -400,7 +400,7 @@ SOUND_CUE_THRESHOLDS = [
 ```
 This allows the code to be able to retrieve information for each distance from this list consistently without having to manually type it in every time.
 
-Return the minimum distance from the tag (point) to the centre of any active ghost.
+The function 'nearest_ghost_distance' returns the minimum distance from the tag (point) to the centre of any active ghost:
 ```python
 def nearest_ghost_distance(point):
     active = [g for g in Ghosts if g.get("active", True)]
@@ -408,17 +408,29 @@ def nearest_ghost_distance(point):
         return float("inf")
     return min(dist_to_ghost(point, g) for g in active)
 ```
+This is so that the code is able to discern the distance and thus which cue to play.  
 
+cue_for_distance checks if the tag is within the cue thresholds stated above, then returns the Multiplay address written in SOUND_CUE_THRESHOLDS if it is, and None if it isn't.  
+
+```python
+def cue_for_distance(distance):
+    for threshold, address in SOUND_CUE_THRESHOLDS:
+        if distance <= threshold:
+            return address
+    return None
+```
+
+
+Within the MultiplayClient class, there are 3 functions, '__init __', 'stop_all', and 'trigger'.
 ```python
 class MultiplayClient:
     def __init__(self, ip: str, port: int):
         self._client = SimpleUDPClient(ip, port)
         print(f"[multiplay] OSC client initialised → {ip}:{port}")
 ```
-Thin wrapper around pythonosc SimpleUDPClient for triggering Multiplay cues.  
-One shared instance is created at startup and re-used across all tags.  
-Thread-safe: SimpleUDPClient.send_message() is stateless per call.  
-
+__init __ initialises the Multiplay pythonOSC SimpleUDPClient for triggering Multiplay cues, creating a shared instance at startup and re-using it across all tags.  
+  
+Next, stop_all stops every currently active cue in Multiplay (/cue/all/stop).
 ```python
     def stop_all(self):
         try:
@@ -427,7 +439,9 @@ Thread-safe: SimpleUDPClient.send_message() is stateless per call.
         except Exception as exc:
             print(f"[multiplay] stop_all failed: {exc}")
 ```
-Stop every currently active cue in Multiplay (/cue/all/stop).
+  
+Finally, trigger stops all active cues, then immediately fires the requested cue.  
+Stopping first guarantees no two proximity cues ever overlap, regardless of how Multiplay's own looping or auto-follow is configured.  
 
 ```python
     def trigger(self, address: str):
@@ -438,10 +452,21 @@ Stop every currently active cue in Multiplay (/cue/all/stop).
         except Exception as exc:
             print(f"[multiplay] send failed ({address}): {exc}")
 ```
+Within the game's main logic, these functions are applied like so:
+```python
+if multiplay_client and not state.game_won and not state.game_lost:
+    dist = nearest_ghost_distance(tag.filt_position)
+    new_cue = cue_for_distance(dist)
+    if new_cue != tag.last_cue:
+        if new_cue is not None:
+            multiplay_client.trigger(new_cue)
+        else:
+            multiplay_client.stop_all()
+        tag.last_cue = new_cue
+```
+It first checks if the game is still running by using an if statement to verify the game state is not won or lost, so that it will only send cues while the game is still running.  
+stop_all() is called inside trigger() before the new cue fires,  so overlaps are impossible.
 
-Stop all active cues, then immediately fire the requested cue.  
-Stopping first guarantees no two proximity cues ever overlap, regardless of how Multiplay's own looping or auto-follow is configured.
- 
 ## Repository Layout
 ```
 .
