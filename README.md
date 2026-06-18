@@ -57,9 +57,8 @@ H --OSC--> I[Multiplay]
 ```
 
 ### 2.2 Setup of tags & configuration
-In this project, a single Ai-Thinker BU03-Kit module is configured as a tag, while six other modules are configured as fixed anchors placed around the game area.  
-  
-To do so, 
+In this project, a single Ai-Thinker BU03-Kit module is configured as a tag, while six other modules are configured as fixed anchors placed around the game area. These are the fixed reference points used to calculate position.  
+
 
 ### Physical Setup
 ![setupimg](.\images\BU03setup.JPG)
@@ -71,8 +70,7 @@ The tag continuously exchanges UWB signals with the anchors and outputs the calc
 Using the known coordinates of the anchors, the Raspberry Pi performs multilateration to determine the player's real-time position within the game environment.   
   
 To improve tracking accuracy, calibration offsets are applied to compensate for ranging errors, and a Kalman filter is used to smooth position data and reduce measurement noise.   
-  
-This setup provides reliable indoor positioning for the ghost hunting game, enabling location-based gameplay mechanics such as ghost detection and dispelling.
+
 
 # 3. POC game code
 The programming of the game for POC includes the base game mechanic of dispelling ghosts with the tag and button, win/lose condition, synchronised SFX using Multiplay, and a [sequential tutorial](Tutorial.md).  
@@ -109,6 +107,7 @@ Ghosts = [
 ]
 ```   
 
+The function ptInGhost determines where the tag is from the ghost by using Pythagoras, and enter/exit events only fire once at the moment of crossing.  
 ```python
 def ptInGhost(point, ghost):
     if point is None:
@@ -120,8 +119,17 @@ def ptInGhost(point, ghost):
     dy = py - zy
     return (dx * dx + dy * dy) <= (r * r)
 ```
-Determines where tag is from ghost
-
+Both of these allow the game to recognise where the ghosts and tags are in relation to one another and the anchors.  
+This is then visualised in __init __, where mpatches.Circle patches added to the axes with dashed edges and ghost label text centred inside:
+```python
+self.ghost_patches = {}
+        for zi, ghost in enumerate(Ghosts):
+            cx, cy = ghost["center"]
+            circle = mpatches.Circle((cx, cy), ghost["radius"], fill=False, linewidth=3, linestyle="-.", edgecolor=ghost["color"], alpha=0.9)
+            self.ax_plot.add_patch(circle)
+            txt = self.ax_plot.text(cx, cy, ghost["label"], color=ghost["color"], fontsize=11, ha="center", va="center", weight="bold")
+            self.ghost_patches[zi] = (circle, txt)
+```
 
 ## Rapberry Pi button input 
 This game requires a button input to create the ghost dispelling mechanic.   
@@ -202,9 +210,9 @@ for zi, ghost in enumerate(Ghosts):
                                 print(f"\n🎯 HIT! Tag {tag_id} dispelled {ghost['label']}!")
                                 ghost["active"] = False
 ```
-ghost will be removed by changing the ghost's active state to False.
+the ghost will be removed by changing the ghost's active state to False.
 
-This is where the loop will visually faster erase the ghosts from the screen during the user interface frame refresh loop.
+This is where the loop will visually erase the ghosts from the screen during the user interface frame refresh loop.
 ```python
         self.root.after(40, self.update_loop)
 
