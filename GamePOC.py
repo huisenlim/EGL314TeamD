@@ -28,6 +28,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from pythonosc import dispatcher as osc_dispatcher
 from pythonosc import osc_server
+from pythonosc.udp_client import SimpleUDPClient
 
 # ---------------------------------------------------------------------------
 # Anchor layout and view config
@@ -96,6 +97,23 @@ TIMER_PENALTY_MISS   = 5     # seconds deducted on wrong button press
 
 
 # ---------------------------------------------------------------------------
+# Multiplay Sound Cue Configuration
+# ---------------------------------------------------------------------------
+MULTIPLAY_IP   = "192.168.254.173"   # IP of the Multiplay machine
+MULTIPLAY_PORT = 5005                # OSC UDP port Multiplay listens on
+
+# Distance thresholds mapped to Multiplay cue numbers.
+# Evaluated top-to-bottom; first threshold the player is WITHIN triggers that cue.
+# Distances are Euclidean metres from the tag to the nearest active ghost centre.
+SOUND_CUE_THRESHOLDS = [
+    (0.0,   "/cue/4/go"),   # right on the ghost  (hit tolerance)
+    (0.25,  "/cue/3/go"),   # very close
+    (0.625, "/cue/2/go"),   # medium range
+    (1.0,   "/cue/1/go"),   # far away
+]
+# If the tag is beyond all thresholds, no cue is sent (silence / ambient).
+
+# ---------------------------------------------------------------------------
 # Trilateration Core Logic
 # ---------------------------------------------------------------------------
 def trilaterate_2d(anchor_positions, distances):
@@ -137,9 +155,64 @@ def ptInGhost(point, ghost):
     return (dx * dx + dy * dy) <= (r * r)
 
 
-# ---------------------------------------------------------------------------
-# Kalman Filter Tracking Processing
-# ---------------------------------------------------------------------------
+def dist_to_ghost(point, ghost):
+    """Return Euclidean distance from point to ghost centre."""
+    px, py = point
+    gx, gy = ghost["center"]
+    return ((px - gx) ** 2 + (py - gy) ** 2) ** 0.5
+
+
+def nearest_ghost_distance(point):
+    """Return the minimum distance from point to any active ghost centre."""
+    active = [g for g in Ghosts if g.get("active", True)]
+    if not active:
+        return float("inf")
+    return min(dist_to_ghost(point, g) for g in active)
+
+
+def cue_for_distance(distance):
+    """
+    Map a raw Euclidean distance to a Multiplay OSC cue address.
+    Returns None when the player is too far away for any cue.
+    """
+    for threshold, address in SOUND_CUE_THRESHOLDS:
+        if distance <= threshold:
+            return address
+    return None
+
+
+class MultiplayClient:
+    """
+    Thin wrapper around pythonosc SimpleUDPClient for triggering Multiplay cues.
+    One shared instance is created at startup and re-used across all tags.
+    Thread-safe: SimpleUDPClient.send_message() is stateless per call.
+    """
+    def __init__(self, ip: str, port: int):
+        self._client = SimpleUDPClient(ip, port)
+        print(f"[multiplay] OSC client initialised → {ip}:{port}")
+
+    def stop_all(self):
+        """Stop every currently active cue in Multiplay (/cue/all/stop)."""
+        try:
+            self._client.send_message("/cue/all/stop", [])
+            print("[multiplay] all cues stopped")
+        except Exception as exc:
+            print(f"[multiplay] stop_all failed: {exc}")
+
+    def trigger(self, address: str):
+        """
+        Stop all active cues, then immediately fire the requested cue.
+        Stopping first guarantees no two proximity cues ever overlap,
+        regardless of how Multiplay's own looping or auto-follow is configured.
+        """
+        try:
+            self._client.send_message("/cue/all/stop", [])
+            self._client.send_message(address, [])
+            print(f"[multiplay] stopped all → cue sent: {address}")
+        except Exception as exc:
+            print(f"[multiplay] send failed ({address}): {exc}")
+
+
 class Kalman2D:
     def __init__(self, dt=0.10, q=0.12, r=1.1):
         self.dt = dt
@@ -183,6 +256,7 @@ class TagState:
     last_update:    float = 0.0
     kalman: Kalman2D = field(default_factory=Kalman2D)
     ghosts_inside: set = field(default_factory=set)
+    last_cue: str = None   # last Multiplay cue address sent for this tag
 
 
 class SharedState:
@@ -203,7 +277,7 @@ class SharedState:
 # ---------------------------------------------------------------------------
 # OSC Handler & Main Gameplay Decision Matrix
 # ---------------------------------------------------------------------------
-def make_osc_handler(state: SharedState, anchor_ids, anchor_positions_list, csv_writer=None):
+def make_osc_handler(state: SharedState, anchor_ids, anchor_positions_list, csv_writer=None, multiplay_client: MultiplayClient = None):
     def handle_distances(address, *args):
         if len(args) < 9 or state.game_won or state.game_lost or state.stop:
             return
@@ -263,6 +337,21 @@ def make_osc_handler(state: SharedState, anchor_ids, anchor_positions_list, csv_
                 if all(not g.get("active", True) for g in Ghosts):
                     state.game_won = True
                     print("\n🏆 !!! CONGRATSS !!! All ghosts cleared! 🏆")
+
+                # --- PROXIMITY SOUND CUES ---
+                # Only send cues while the game is still running.
+                if multiplay_client and not state.game_won and not state.game_lost:
+                    dist = nearest_ghost_distance(tag.filt_position)
+                    new_cue = cue_for_distance(dist)
+                    if new_cue != tag.last_cue:
+                        if new_cue is not None:
+                            # stop_all() is called inside trigger() before the
+                            # new cue fires, so overlaps are impossible.
+                            multiplay_client.trigger(new_cue)
+                        else:
+                            # Tag moved out of all threshold ranges — silence.
+                            multiplay_client.stop_all()
+                        tag.last_cue = new_cue
 
             else:
                 tag.kalman.predict()
@@ -553,8 +642,11 @@ def main():
     anchor_ids = sorted(ANCHORS.keys())
     anchor_positions_list = [ANCHORS[i] for i in anchor_ids]
 
+    # --- MULTIPLAY SOUND CUE CLIENT ---
+    multiplay = MultiplayClient(MULTIPLAY_IP, MULTIPLAY_PORT)
+
     disp = osc_dispatcher.Dispatcher()
-    handler = make_osc_handler(state, anchor_ids, anchor_positions_list)
+    handler = make_osc_handler(state, anchor_ids, anchor_positions_list, multiplay_client=multiplay)
     disp.map("/distances", handler)
 
     server = osc_server.ThreadingOSCUDPServer(("0.0.0.0", args.port), disp)
