@@ -87,6 +87,13 @@ COLOR_NAMES = [
 
 DEFAULT_PORT = 5005   # UDP port to listen on
 
+# ---------------------------------------------------------------------------
+# Timer Configuration
+# ---------------------------------------------------------------------------
+TIMER_START_SECONDS  = 120   # starting countdown
+TIMER_BONUS_CAPTURE  = 30    # seconds added on successful ghost capture
+TIMER_PENALTY_MISS   = 5     # seconds deducted on wrong button press
+
 
 # ---------------------------------------------------------------------------
 # Trilateration Core Logic
@@ -187,8 +194,10 @@ class SharedState:
         self.frame_count = 0
         self.start_time  = time.time()
         self.stop = False
-        self.game_won = False
-        self.button_pressed = False  # Track live hardware button state
+        self.game_won  = False
+        self.game_lost = False                        # NEW: lose flag
+        self.button_pressed = False
+        self.timer_end = time.time() + TIMER_START_SECONDS  # NEW: absolute deadline
 
 
 # ---------------------------------------------------------------------------
@@ -196,7 +205,7 @@ class SharedState:
 # ---------------------------------------------------------------------------
 def make_osc_handler(state: SharedState, anchor_ids, anchor_positions_list, csv_writer=None):
     def handle_distances(address, *args):
-        if len(args) < 9 or state.game_won or state.stop:
+        if len(args) < 9 or state.game_won or state.game_lost or state.stop:
             return
 
         tag_id    = int(args[0])
@@ -236,10 +245,13 @@ def make_osc_handler(state: SharedState, anchor_ids, anchor_positions_list, csv_
                         if state.button_pressed and is_in_zone:
                             print(f"\n=== SUCCESS === Tag {tag_id} dispelled Ghost: {ghost['label']}!")
                             ghost["active"] = False
+                            # Bonus time for successful capture
+                            state.timer_end += TIMER_BONUS_CAPTURE
+                            print(f"[timer] +{TIMER_BONUS_CAPTURE}s bonus — new remaining: {state.timer_end - time.time():.1f}s")
 
                         # Condition 2: Button is pressed AND tag is NOT inside the ghost zone
                         elif state.button_pressed and not is_in_zone:
-                            pass # Ghost remains unaffected 
+                            pass # Ghost remains unaffected
 
                         # Condition 3: Button is NOT pressed AND tag is inside the ghost zone
                         elif not state.button_pressed and is_in_zone:
@@ -250,7 +262,7 @@ def make_osc_handler(state: SharedState, anchor_ids, anchor_positions_list, csv_
                 # Check for Win Condition (Are all ghosts turned off?)
                 if all(not g.get("active", True) for g in Ghosts):
                     state.game_won = True
-                    print("\n🏆 !!! CONGRATS!!! U WIN!!! ALL GHOSTS CLEARED!!! 🏆")
+                    print("\n🏆 !!! CONGRATSS !!! All ghosts cleared! 🏆")
 
             else:
                 tag.kalman.predict()
@@ -316,6 +328,14 @@ class ViewerApp:
         self.hud = self.ax_plot.text(0.02, 0.98, "", transform=self.ax_plot.transAxes, va="top", ha="left", color="white",
                                     fontsize=10, family="monospace", bbox=dict(facecolor="black", alpha=0.5, edgecolor="none"))
 
+        # NEW: timer display — centred at top of plot
+        self.timer_text = self.ax_plot.text(
+            0.5, 0.98, "", transform=self.ax_plot.transAxes,
+            va="top", ha="center", color="#00ff00",
+            fontsize=22, family="monospace", weight="bold",
+            bbox=dict(facecolor="black", alpha=0.6, edgecolor="none"),
+        )
+
         self.canvas = FigureCanvasTkAgg(self.fig, master=plot_frame)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill="both", expand=True)
@@ -368,11 +388,49 @@ class ViewerApp:
             try: root.attributes("-fullscreen", True)
             except tk.TclError: pass
 
-        self.root.after(40, self.update_loop)
+        self.root.after(50, self.update_loop)
 
     def update_loop(self):
         if self.state.stop:
             return
+
+        now = time.time()
+
+        # --- TIMER EXPIRY CHECK (lose condition) ---
+        with self.state.lock:
+            time_remaining = self.state.timer_end - now
+            already_lost   = self.state.game_lost
+            already_won    = self.state.game_won
+
+        if not already_won and not already_lost and time_remaining <= 0:
+            with self.state.lock:
+                self.state.game_lost = True
+            print("\n💀 TIME'S UP — GAME OVER! You lose! 💀")
+
+        # Refresh game state flags after potential update above
+        with self.state.lock:
+            already_lost = self.state.game_lost
+            already_won  = self.state.game_won
+            time_remaining = self.state.timer_end - now
+
+        # --- TIMER DISPLAY ---
+        if already_won:
+            self.timer_text.set_text("")          # hide timer on win (title handles it)
+        elif already_lost:
+            self.timer_text.set_text("TIME'S UP!")
+            self.timer_text.set_color("#ff0000")
+        else:
+            secs = max(0, int(time_remaining))
+            mins, s = divmod(secs, 60)
+            timer_str = f"⏱ {mins:02d}:{s:02d}"
+            self.timer_text.set_text(timer_str)
+            # Colour shifts red in last 30 seconds
+            if secs <= 30:
+                self.timer_text.set_color("#ff4444")
+            elif secs <= 60:
+                self.timer_text.set_color("#ffaa00")
+            else:
+                self.timer_text.set_color("#00ff00")
 
         # Check and handle active visual drop modifications
         for zi, ghost in enumerate(Ghosts):
@@ -388,11 +446,12 @@ class ViewerApp:
         with self.state.lock:
             if self.state.game_won:
                 self.ax_plot.set_title("GAME OVER — AREA CLEARED! YOU WIN!", color="#00ff00", fontsize=16, weight="bold")
-            
+            elif self.state.game_lost:
+                self.ax_plot.set_title("GAME OVER — TIME'S UP! YOU LOSE!", color="#ff0000", fontsize=16, weight="bold")
+
             snapshot = [{"filt": t.filt_position, "dists": list(t.last_distances), "last": t.last_update} for t in self.state.tags]
             total, elapsed, color_indices = self.state.frame_count, time.time() - self.state.start_time, list(self.state.row_color_index)
 
-        now = time.time()
         for row, snap in enumerate(snapshot):
             color = TAG_COLORS[color_indices[row]]
             pos, stale = snap["filt"], (now - snap["last"] > 1.0) if snap["last"] else True
@@ -422,7 +481,10 @@ class ViewerApp:
 
         rate = total / elapsed if elapsed > 0 else 0
         active = sum(1 for s in snapshot if s["filt"] is not None and now - s["last"] < 1.0)
-        self.hud.set_text(f"frames: {total}\nrate:   {rate:5.1f} Hz\nactive: {active}/{self.state.n_tags}\nButton Pin 27: {'PRESSED' if self.state.button_pressed else 'OPEN'}")
+        self.hud.set_text(
+            f"frames: {total}\nrate:   {rate:5.1f} Hz\nactive: {active}/{self.state.n_tags}\n"
+            f"Button Pin 27: {'PRESSED' if self.state.button_pressed else 'OPEN'}"
+        )
 
         self.canvas.draw_idle()
         self.root.after(66, self.update_loop)
@@ -463,18 +525,29 @@ def main():
 
             # --- FORCE IMMEDIATE DEACTIVATION ON PRESS ---
             if is_pressed:
+                hit_any_ghost = False
+
                 for tag_id, tag in enumerate(state.tags):
                     if tag.filt_position is None:
                         continue
-                    
+
                     for zi, ghost in enumerate(Ghosts):
                         if ghost.get("active", True):
-                            # Check if this tag is inside this ghost right now
                             if ptInGhost(tag.filt_position, ghost):
                                 print(f"\n🎯 HIT! Tag {tag_id} dispelled {ghost['label']}!")
                                 ghost["active"] = False
+                                hit_any_ghost = True
+                                # Bonus time for successful capture
+                                state.timer_end += TIMER_BONUS_CAPTURE
+                                print(f"[timer] +{TIMER_BONUS_CAPTURE}s bonus — new remaining: {state.timer_end - time.time():.1f}s")
 
-    # 200ms software bounce filter mapping 
+                # NEW: penalty if button pressed but no ghost was hit
+                if not hit_any_ghost:
+                    state.timer_end -= TIMER_PENALTY_MISS
+                    remaining = state.timer_end - time.time()
+                    print(f"\n❌ MISS! No ghost hit — -{TIMER_PENALTY_MISS}s penalty. Remaining: {remaining:.1f}s")
+
+    # 200ms software bounce filter mapping
     GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=pin_edge_callback, bouncetime=200)
 
     anchor_ids = sorted(ANCHORS.keys())
