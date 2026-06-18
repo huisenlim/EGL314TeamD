@@ -8,16 +8,16 @@ This project has just passed the POC phase, and is documented as such.
 2. [System Structure & Setup](#2-system-structure--setup)
 * 2.1 [Basic structure](#21-basic-structure-of-system)
 * 2.2 [Tag configuration](#22-tag-configuration)
-3. [Repository Structure](#3-repository-structure)
-* 3.1 [Game code for POC](#31-poc-game-code)
+3. [Game code for POC](#3-poc-game-code)
     * [Base of game](#base-game)
     * [Button input](#rapberry-pi-button-input)
     * [Ghost dispelling mechanic](#ghost-dispelling-mechanic)
     * [Winning condition](#win-condition)
     * [Lose condition](#lose-condition)
     * [Proximity beeping mechanic](#proximity-beeping-mechanic)  
-* 3.2 [Tutorial](Tutorial.md)
-* 3.3 [UART data receiver file](uart.py)
+* 3.1 [Tutorial](Tutorial.md)
+* 3.2 [UART data receiver file](uart.py)
+4. [Repository Layout](#repository-layout)
 
 
 
@@ -71,8 +71,7 @@ Using the known coordinates of the anchors, the Raspberry Pi performs multilater
 To improve tracking accuracy, calibration offsets are applied to compensate for ranging errors, and a Kalman filter is used to smooth position data and reduce measurement noise.   
 This setup provides reliable indoor positioning for the ghost hunting game, enabling location-based gameplay mechanics such as ghost detection and dispelling.
 
-## 3. Repository Structure
-### 3.1 POC game code
+## 3. POC game code
 The programming of the game for POC includes the base game mechanic of dispelling ghosts with the tag and button, win/lose condition, synchronised SFX using Multiplay, and a [sequential tutorial](Tutorial.md).  
 
 ### Base game  
@@ -133,7 +132,7 @@ import RPi.GPIO as GPIO
 ```
 
 ### Ghost Dispelling Mechanic
-When Player is in the zone where the ghosts is and when button is pressed, ghosts will be dispelled.
+When Player is in the vicinity of a ghost and presses the button, the ghost will be dispelled.  
 
 When button is pressed
 ``` python
@@ -148,7 +147,6 @@ When button is pressed
                     if tag.filt_position is None:
                         continue
 ```
-
 And tag is in the zone where the ghosts is,
 ```python
 for zi, ghost in enumerate(Ghosts):
@@ -158,10 +156,10 @@ for zi, ghost in enumerate(Ghosts):
                                 print(f"\n🎯 HIT! Tag {tag_id} dispelled {ghost['label']}!")
                                 ghost["active"] = False
 ```
-ghosts "zone" will be removed.
+ghost will be removed by changing the ghost's active state to False.
 
 ### Win Condition
-For the player to win, they must first carry a tag (tracking device to know your location) and the button.  
+For the player to win, they must first carry the BU03 tag and button.  
 The player must both be in the vicinity of the ghost and press the button to dispel the ghost.  
 Clear all three ghosts within the allocated time to win.
 
@@ -179,7 +177,7 @@ for zi, ghost in enumerate(Ghosts):
                         is_in_zone = ptInGhost(tag.filt_position, ghost)
 ```
 
-Secondly, set condition for the player to achieve to win the game.
+Secondly, set the condition the player has to achieve to win the game.
 1. If button is pressed and tag is in the zone of the ghosts,
 ```python
  # Condition 1: Button is pressed AND tag is inside the ghost zone
@@ -195,15 +193,15 @@ ghosts will be dispelled.
                         elif state.button_pressed and not is_in_zone:
                             pass # Ghost remains unaffected 
 ```
-ghosts will remained.
+ghosts will remain.
 
-3. Else if button is not pressed and tag is in the zone of the ghosts,
+3. Or, if button is not pressed and tag is in the zone of the ghosts,
 ```python
 # Condition 3: Button is NOT pressed AND tag is inside the ghost zone
                         elif not state.button_pressed and is_in_zone:
                             current_ghosts.add(zi) # Ghost remains, mark as occupying zone
 ```
-ghosts will remained.
+ghosts will remain.
 
 Lastly, after all ghosts is removed within the timeframe, player wins the game.
 ```python
@@ -232,7 +230,7 @@ First, the Multiplay IP address and port are defined in the game's code:
 MULTIPLAY_IP   = "192.168.254.173"   # IP of the Multiplay machine
 MULTIPLAY_PORT = 5005                # OSC UDP port Multiplay listens on
 ```
-Next, open Multiplay>Files>Preferences
+Next, open Multiplay>Files>Preferences  
 ![multiplayPrefss](images\MultiplayPref.png)  
 Then, open OSC Control and set the port to the corresponding port number while also enabling Control (Incoming).
 ![multiplayOSCss](images\multiplayOSC.png)
@@ -246,8 +244,9 @@ SOUND_CUE_THRESHOLDS = [
     (1.0,   "/cue/1/go"),   # far away
 ]
 ```
+This allows the code to be able to retrieve information for each distance from this list consistently without having to manually type it in every time.
 
-Return the minimum distance from point to any active ghost centre.
+Return the minimum distance from the tag (point) to the centre of any active ghost.
 ```python
 def nearest_ghost_distance(point):
     active = [g for g in Ghosts if g.get("active", True)]
@@ -289,3 +288,18 @@ Stop every currently active cue in Multiplay (/cue/all/stop).
 Stop all active cues, then immediately fire the requested cue.  
 Stopping first guarantees no two proximity cues ever overlap, regardless of how Multiplay's own looping or auto-follow is configured.
  
+## Repository Layout
+```
+.
+├── README.md                  # this file
+├── GamePOC.py                 # 
+├── bu03_detect.py             # 
+├── uart.py         # 
+├── POCtutorial.py   # 
+├── tutorial.md        # 
+├──                   # 
+└── ConfigFiles/
+    ├── bu03_detect.py         # full AT command reference
+    ├── bu03_multi_config.py   # BU03 board pinout
+    ├── bu03_inspect.py
+```
