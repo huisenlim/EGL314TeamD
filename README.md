@@ -193,7 +193,7 @@ When button is pressed
                     if tag.filt_position is None:
                         continue
 ```
-And tag is in the zone where the ghosts is,
+And tag is in the zone where one of the ghosts is,
 ```python
 for zi, ghost in enumerate(Ghosts):
                         if ghost.get("active", True):
@@ -204,8 +204,23 @@ for zi, ghost in enumerate(Ghosts):
 ```
 ghost will be removed by changing the ghost's active state to False.
 
+This is where the loop will visually faster erase the ghosts from the screen during the user interface frame refresh loop.
+```python
+        self.root.after(40, self.update_loop)
+
+for zi, ghost in enumerate(Ghosts):
+            if not ghost.get("active", True) and zi in self.ghost_patches:
+                circle, txt = self.ghost_patches[zi]
+                try:
+                    circle.remove()
+                    txt.remove()
+                except ValueError:
+                    pass
+                del self.ghost_patches[zi]
+```
+
 ## Win Condition
-For the player to win, they must first carry the BU03 tag and button.  
+For the player to win, they must first carry the BU03 tag (a tracking device) and button.  
 The player must both be in the vicinity of the ghost and press the button to dispel the ghost.  
 Clear all three ghosts within the allocated time to win.
 
@@ -231,7 +246,7 @@ Secondly, set the condition the player has to achieve to win the game.
                             print(f"\n=== SUCCESS === Tag {tag_id} dispelled Ghost: {ghost['label']}!")
                             ghost["active"] = False
 ```
-ghosts will be dispelled.
+ghosts will be dispelled and zone will be removed.
 
 2. Else if button is pressed and tag is not in the zone of the ghosts,
 ```python
@@ -241,7 +256,7 @@ ghosts will be dispelled.
 ```
 ghosts will remain.
 
-3. Or, if button is not pressed and tag is in the zone of the ghosts,
+3. Else if button is not pressed and tag is in the zone of the ghosts,
 ```python
 # Condition 3: Button is NOT pressed AND tag is inside the ghost zone
                         elif not state.button_pressed and is_in_zone:
@@ -251,6 +266,8 @@ ghosts will remain.
 
 Lastly, after all ghosts is removed within the timeframe, player wins the game.
 ```python
+                tag.ghosts_inside = {zi for zi in current_ghosts if Ghosts[zi]["active"]}
+                
 # Check for Win Condition (Are all ghosts turned off?)
                 if all(not g.get("active", True) for g in Ghosts):
                     state.game_won = True

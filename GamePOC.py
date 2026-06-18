@@ -477,7 +477,7 @@ class ViewerApp:
             try: root.attributes("-fullscreen", True)
             except tk.TclError: pass
 
-        self.root.after(50, self.update_loop)
+        self.root.after(40, self.update_loop)
 
     def update_loop(self):
         if self.state.stop:
