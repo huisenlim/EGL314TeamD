@@ -71,10 +71,10 @@ Using the known coordinates of the anchors, the Raspberry Pi performs multilater
 To improve tracking accuracy, calibration offsets are applied to compensate for ranging errors, and a Kalman filter is used to smooth position data and reduce measurement noise.   
 This setup provides reliable indoor positioning for the ghost hunting game, enabling location-based gameplay mechanics such as ghost detection and dispelling.
 
-## 3. POC game code
+# 3. POC game code
 The programming of the game for POC includes the base game mechanic of dispelling ghosts with the tag and button, win/lose condition, synchronised SFX using Multiplay, and a [sequential tutorial](Tutorial.md).  
 
-### Base game  
+## Base game  
 The game consists of three ghosts.  
 The information for each ghost is stored as a **dictionary** within a **list**, named 'Ghosts' as follows:
 ```python
@@ -120,9 +120,10 @@ def ptInGhost(point, ghost):
 Determines where tag is from ghost
 
 
-### Rapberry Pi button input 
+## Rapberry Pi button input 
 This game requires a button input to create the ghost dispelling mechanic.   
 For that, first install the Rasberry Pi GPIO:
+  
 ```
 pip install RPi.GPIO==0.7.1
 ```
@@ -132,10 +133,7 @@ import RPi.GPIO as GPIO
 ```
 
 
-
-
-
-### 1. Pin Declaration & GPIO Setup
+### Pin Declaration & GPIO Setup
 
 ```python
 BUTTON_PIN = 27
@@ -143,11 +141,9 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 ```
 
-This sets GPIO pin 27 as an input with an internal pull-up resistor, meaning the pin reads HIGH normally and goes LOW when the button is pressed.
+This sets GPIO pin 27 as an input with an internal pull-up resistor, meaning the pin reads HIGH normally and goes LOW when the button is pressed.  
 
----
-
-### 2. The Callback Function
+### Callback Function:
 
 ```python
 def pin_edge_callback(channel):
@@ -159,9 +155,9 @@ def pin_edge_callback(channel):
 
 This function runs automatically whenever the button is pressed or released. `not GPIO.input(channel)` flips the logic — since the pin is pull-up, a LOW signal (button pressed) becomes `True`.
 
----
 
-### 3. Edge Detection Registration
+
+### Edge Detection Registration
 
 ```python
 GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=pin_edge_callback, bouncetime=200)
@@ -169,9 +165,8 @@ GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=pin_edge_callback, boun
 
 This is what actually "listens" for the button. `GPIO.FALLING` means it triggers on the HIGH→LOW transition (i.e. the moment the button is pressed down). The `bouncetime=200` is a 200ms debounce filter to prevent a single press from firing multiple times.
 
----
 
-### 4. Cleanup on Exit
+### Cleanup on Exit
 
 ```python
 GPIO.cleanup()
@@ -206,7 +201,7 @@ for zi, ghost in enumerate(Ghosts):
 ```
 ghost will be removed by changing the ghost's active state to False.
 
-### Win Condition
+## Win Condition
 For the player to win, they must first carry the BU03 tag and button.  
 The player must both be in the vicinity of the ghost and press the button to dispel the ghost.  
 Clear all three ghosts within the allocated time to win.
@@ -259,17 +254,15 @@ Lastly, after all ghosts is removed within the timeframe, player wins the game.
                     print("\n🏆 !!! CONGRATS!!! U WIN!!! ALL GHOSTS CLEARED!!! 🏆")
 ```
 
-### Lose Condition
+## Lose Condition
 The game starts with a 120-second countdown timer.  
 Each time the player successfully dispels a ghost by pressing the correct button while inside the correct zone, 30 seconds are added to the remaining time.  
+  
 If the player attempts to dispel a ghost outside the designated zone, 5 seconds are deducted from the remaining time.  
 The player will lose when the countdown timer reaches 0 seconds before all ghosts are dispelled.
 
-### Lose Condition — `GamePOC.py` Code Walkthrough
 
----
-
-### 1. Game Starts with a 120-Second Countdown
+### 120-Second Countdown from Game Start
 
 ```python
 # ---------------------------------------------------------------------------
@@ -288,9 +281,8 @@ self.timer_end = time.time() + TIMER_START_SECONDS  # NEW: absolute deadline
 
 The timer is not a simple counter. Instead, `timer_end` stores an **absolute future timestamp** — the current time plus 120 seconds. The remaining time is always computed as `timer_end - time.time()`, which means all bonuses and penalties just shift this deadline forward or backward.
 
----
 
-### 2. +30 Seconds Added on Successful Ghost Dispel
+### Additional 30 Seconds on Successful Ghost Dispel
 
 This happens in **two places** — once in the OSC handler (continuous tracking), and once in the GPIO button callback (instant press detection).
 
@@ -317,12 +309,10 @@ if ptInGhost(tag.filt_position, ghost):
     state.timer_end += TIMER_BONUS_CAPTURE
     print(f"[timer] +{TIMER_BONUS_CAPTURE}s bonus — new remaining: {state.timer_end - time.time():.1f}s")
 ```
+When a successful hit is confirmed (button pressed + player is inside the ghost's zone), `TIMER_BONUS_CAPTURE` (30) is added directly to `timer_end`, pushing the deadline 30 seconds further into the future.
 
-**How it works:** When a successful hit is confirmed (button pressed + player is inside the ghost's zone), `TIMER_BONUS_CAPTURE` (30) is added directly to `timer_end`, pushing the deadline 30 seconds further into the future.
 
----
-
-### 3. −5 Seconds Deducted on a Missed Button Press
+### -5 Seconds Deducted on a Missed Button Press
 
 ```python
 # NEW: penalty if button pressed but no ghost was hit
@@ -336,9 +326,8 @@ if not hit_any_ghost:
 
 If the button is pressed but `hit_any_ghost` remains `False` (the player wasn't inside any active ghost zone), `TIMER_PENALTY_MISS` (5) is **subtracted** from `timer_end`, bringing the deadline 5 seconds closer.
 
----
 
-### 4. Player Loses When Timer Reaches 0
+### Player Loses When Timer Reaches 0
 
 ```python
 # --- TIMER EXPIRY CHECK (lose condition) ---
@@ -379,7 +368,7 @@ elif self.state.game_lost:
 | Button pressed, no ghost hit | `TIMER_PENALTY_MISS = 5` | `-= 5` | `pin_edge_callback` |
 | Timer reaches 0 | — | `game_lost = True` | `ViewerApp.update_loop()` |
 
-### Proximity beeping mechanic
+## Proximity beeping mechanic
 In order for players to decipher where ghosts are without a screen explicitly showing where the ghosts are, sound cues are added in order to hint at the location of the ghosts. 
    
 4 different levels of beeping ranging in frequency will play depending on the distance of the player tag from the nearest ghost.   
@@ -454,14 +443,14 @@ Stopping first guarantees no two proximity cues ever overlap, regardless of how 
 ```
 .
 ├── README.md                  # this file
-├── GamePOC.py                 # 
-├── bu03_detect.py             # 
-├── uart.py         # 
-├── POCtutorial.py   # 
-├── tutorial.md        # 
-├──                   # 
-└── ConfigFiles/
-    ├── bu03_detect.py         # 
-    ├── bu03_multi_config.py   # 
-    ├── bu03_inspect.py
+├── GamePOC.py                 # game file for POC
+├── uart.py                    # for UART receiver pi
+├── POCtutorial.py             # Tutorial game file for POC
+├── tutorial.md                # Tutorial game file documentation
+└── ConfigFiles/               
+    ├── bu03_detect.py         # UART connection confirmation
+    ├── bu03_multi_config.py   # to config ID/role for each board
+    ├── bu03_inspect.py        # reads back configuration
+    ├── viewer_calibrate.py    # calibration for anchors
+    └── check_uart.sh          # verification of UART mapping
 ```
