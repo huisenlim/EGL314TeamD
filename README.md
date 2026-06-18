@@ -217,6 +217,120 @@ Each time the player successfully dispels a ghost by pressing the correct button
 If the player attempts to dispel a ghost outside the designated zone, 5 seconds are deducted from the remaining time.  
 The player will lose when the countdown timer reaches 0 seconds before all ghosts are dispelled.
 
+### Lose Condition — `GamePOC.py` Code Walkthrough
+
+---
+
+### 1. Game Starts with a 120-Second Countdown
+
+```python
+# ---------------------------------------------------------------------------
+# Timer Configuration
+# ---------------------------------------------------------------------------
+TIMER_START_SECONDS  = 120   # starting countdown
+TIMER_BONUS_CAPTURE  = 30    # seconds added on successful ghost capture
+TIMER_PENALTY_MISS   = 5     # seconds deducted on wrong button press
+```
+
+```python
+self.timer_end = time.time() + TIMER_START_SECONDS  # NEW: absolute deadline
+```
+
+**Where:** `SharedState.__init__()` inside the `SharedState` class.
+
+The timer is not a simple counter. Instead, `timer_end` stores an **absolute future timestamp** — the current time plus 120 seconds. The remaining time is always computed as `timer_end - time.time()`, which means all bonuses and penalties just shift this deadline forward or backward.
+
+---
+
+### 2. +30 Seconds Added on Successful Ghost Dispel
+
+This happens in **two places** — once in the OSC handler (continuous tracking), and once in the GPIO button callback (instant press detection).
+
+### In the OSC handler (`make_osc_handler`):
+
+```python
+# Condition 1: Button is pressed AND tag is inside the ghost zone
+if state.button_pressed and is_in_zone:
+    print(f"\n=== SUCCESS === Tag {tag_id} dispelled Ghost: {ghost['label']}!")
+    ghost["active"] = False
+    # Bonus time for successful capture
+    state.timer_end += TIMER_BONUS_CAPTURE
+    print(f"[timer] +{TIMER_BONUS_CAPTURE}s bonus — new remaining: {state.timer_end - time.time():.1f}s")
+```
+
+### In the GPIO button callback (`pin_edge_callback`):
+
+```python
+if ptInGhost(tag.filt_position, ghost):
+    print(f"\n🎯 HIT! Tag {tag_id} dispelled {ghost['label']}!")
+    ghost["active"] = False
+    hit_any_ghost = True
+    # Bonus time for successful capture
+    state.timer_end += TIMER_BONUS_CAPTURE
+    print(f"[timer] +{TIMER_BONUS_CAPTURE}s bonus — new remaining: {state.timer_end - time.time():.1f}s")
+```
+
+**How it works:** When a successful hit is confirmed (button pressed + player is inside the ghost's zone), `TIMER_BONUS_CAPTURE` (30) is added directly to `timer_end`, pushing the deadline 30 seconds further into the future.
+
+---
+
+### 3. −5 Seconds Deducted on a Missed Button Press
+
+```python
+# NEW: penalty if button pressed but no ghost was hit
+if not hit_any_ghost:
+    state.timer_end -= TIMER_PENALTY_MISS
+    remaining = state.timer_end - time.time()
+    print(f"\n❌ MISS! No ghost hit — -{TIMER_PENALTY_MISS}s penalty. Remaining: {remaining:.1f}s")
+```
+
+**Where:** Still inside `pin_edge_callback`, immediately after the ghost-hit loop.
+
+If the button is pressed but `hit_any_ghost` remains `False` (the player wasn't inside any active ghost zone), `TIMER_PENALTY_MISS` (5) is **subtracted** from `timer_end`, bringing the deadline 5 seconds closer.
+
+---
+
+### 4. Player Loses When Timer Reaches 0
+
+```python
+# --- TIMER EXPIRY CHECK (lose condition) ---
+with self.state.lock:
+    time_remaining = self.state.timer_end - now
+    already_lost   = self.state.game_lost
+    already_won    = self.state.game_won
+
+if not already_won and not already_lost and time_remaining <= 0:
+    with self.state.lock:
+        self.state.game_lost = True
+    print("\n💀 TIME'S UP — GAME OVER! You lose! 💀")
+```
+
+**Where:** `ViewerApp.update_loop()`, which runs every ~66ms via `root.after(66, self.update_loop)`.
+
+Every UI refresh cycle, `time_remaining` is recalculated. The moment it hits zero or below (and the game hasn't already been won), `game_lost` is set to `True`. The display then updates accordingly:
+
+```python
+elif already_lost:
+    self.timer_text.set_text("TIME'S UP!")
+    self.timer_text.set_color("#ff0000")
+```
+
+```python
+elif self.state.game_lost:
+    self.ax_plot.set_title("GAME OVER — TIME'S UP! YOU LOSE!", color="#ff0000", fontsize=16, weight="bold")
+```
+
+---
+
+### Summary Table
+
+| Event | Code Constant | Effect on `timer_end` | Location |
+|---|---|---|---|
+| Game starts | `TIMER_START_SECONDS = 120` | Set to `now + 120` | `SharedState.__init__()` |
+| Ghost dispelled (hit) | `TIMER_BONUS_CAPTURE = 30` | `+= 30` | `pin_edge_callback` / `make_osc_handler` |
+| Button pressed, no ghost hit | `TIMER_PENALTY_MISS = 5` | `-= 5` | `pin_edge_callback` |
+| Timer reaches 0 | — | `game_lost = True` | `ViewerApp.update_loop()` |
+
 ### Proximity beeping mechanic
 In order for players to decipher where ghosts are without a screen explicitly showing where the ghosts are, sound cues are added in order to hint at the location of the ghosts. 
    
