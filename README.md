@@ -7,7 +7,7 @@ This project has just passed the POC phase, and is documented as such.
 1. [Project Overview](#1-Project-Overview)
 2. [System Structure & Setup](#2-system-structure--setup)
 * 2.1 [Basic structure](#21-basic-structure-of-system)
-* 2.2 [Tag configuration](#22-tag-configuration)
+* 2.2 [Tag configuration & Setup](#22-setup-of-tags--configuration)
 3. [Game code for POC](#3-poc-game-code)
     * [Base of game](#base-game)
     * [Button input](#rapberry-pi-button-input)
@@ -55,20 +55,23 @@ G[BU03 Anchor 5] --> A
 B --OSC--> H[Game rPi]
 H --OSC--> I[Multiplay]
 ```
-### Physical Setup
-BU03 Anchors and Tags
-![setupimg](.\images\BU03setup.JPG)
 
-### 2.2 Tag configuration
+### 2.2 Setup of tags & configuration
 In this project, a single Ai-Thinker BU03-Kit module is configured as a tag, while six other modules are configured as fixed anchors placed around the game area.  
   
-The system operates in Two-Way Ranging (TWR) mode, allowing the tag to measure its distance from each anchor without requiring clock synchronization.   
+To do so, 
+
+### Physical Setup
+![setupimg](.\images\BU03setup.JPG)
+
+The system operates in Two-Way Ranging (TWR) mode, allowing the tag to measure its distance from each anchor (on the orange boxes) without requiring clock synchronization.   
   
 The tag continuously exchanges UWB signals with the anchors and outputs the calculated distance measurements through its data UART connection to a Raspberry Pi.   
   
 Using the known coordinates of the anchors, the Raspberry Pi performs multilateration to determine the player's real-time position within the game environment.   
   
 To improve tracking accuracy, calibration offsets are applied to compensate for ranging errors, and a Kalman filter is used to smooth position data and reduce measurement noise.   
+  
 This setup provides reliable indoor positioning for the ghost hunting game, enabling location-based gameplay mechanics such as ghost detection and dispelling.
 
 # 3. POC game code
