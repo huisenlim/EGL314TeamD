@@ -248,7 +248,7 @@ Secondly, set the condition the player has to achieve to win the game.
 ```
 ghosts will be dispelled and zone will be removed.
 
-2. Else if button is pressed and tag is not in the zone of the ghosts,
+2. Or, if button is pressed and tag is not in the zone of the ghosts,
 ```python
                         # Condition 2: Button is pressed AND tag is NOT inside the ghost zone
                         elif state.button_pressed and not is_in_zone:
