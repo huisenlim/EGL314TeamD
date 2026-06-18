@@ -149,7 +149,7 @@ When button is pressed
                         continue
 ```
 
-And tag is in the zone
+And tag is in the zone where the ghosts is,
 ```python
 for zi, ghost in enumerate(Ghosts):
                         if ghost.get("active", True):
@@ -161,11 +161,11 @@ for zi, ghost in enumerate(Ghosts):
 ghosts "zone" will be removed.
 
 ### Win Condition
-For the player to win, they must first carry a tag and the button.  
+For the player to win, they must first carry a tag (tracking device to know your location) and the button.  
 The player must both be in the vicinity of the ghost and press the button to dispel the ghost.  
 Clear all three ghosts within the allocated time to win.
 
-Firstly, identify if tag is in the zone
+Firstly, identify if tag is in the zone of the ghosts.
 ```python
 for zi, ghost in enumerate(Ghosts):
                     if ghost.get("active", True):
@@ -179,8 +179,8 @@ for zi, ghost in enumerate(Ghosts):
                         is_in_zone = ptInGhost(tag.filt_position, ghost)
 ```
 
-Secondly, set condition for the player to archive to win the game.
-1. If button is pressed and tag is in the zone 
+Secondly, set condition for the player to achieve to win the game.
+1. If button is pressed and tag is in the zone of the ghosts,
 ```python
  # Condition 1: Button is pressed AND tag is inside the ghost zone
                         if state.button_pressed and is_in_zone:
@@ -189,7 +189,7 @@ Secondly, set condition for the player to archive to win the game.
 ```
 ghosts will be dispelled.
 
-2. Else if button is pressed and tag is not in the zone
+2. Else if button is pressed and tag is not in the zone of the ghosts,
 ```python
                         # Condition 2: Button is pressed AND tag is NOT inside the ghost zone
                         elif state.button_pressed and not is_in_zone:
@@ -197,7 +197,7 @@ ghosts will be dispelled.
 ```
 ghosts will remained.
 
-3. ELse if button is not pressed and tag is in the zone
+3. Else if button is not pressed and tag is in the zone of the ghosts,
 ```python
 # Condition 3: Button is NOT pressed AND tag is inside the ghost zone
                         elif not state.button_pressed and is_in_zone:
