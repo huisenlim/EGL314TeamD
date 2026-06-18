@@ -1,5 +1,5 @@
 # EGL314 Experiental Ghost Hunting Game: POC
-This contains the documentation of our experiential ghost hunting game utilising the **Ai-Thinker BU03-Kit** UWB modules (DW3000 + STM32F103) for live player tracking.  
+This repository contains the documentation of our experiential ghost hunting game utilising the **Ai-Thinker BU03-Kit** UWB modules (DW3000 + STM32F103) for live player tracking.  
 This project has just passed the POC phase, and is documented as such.
 
 
@@ -44,6 +44,7 @@ Whenever a ghost is successfully dispelled, an additional 30 seconds is added, w
 
 ## 2. System Structure & Setup
 ### 2.1 Basic structure of system
+
 ```mermaid
 graph TD
 A[BU03 Anchor 0]--UART-->B[Receiver rPi]
@@ -59,9 +60,8 @@ H --OSC--> I[Multiplay]
 ### 2.2 Setup of tags & configuration
 In this project, a single Ai-Thinker BU03-Kit module is configured as a tag, while six other modules are configured as fixed anchors placed around the game area. These are the fixed reference points used to calculate position.  
 
-
 ### Physical Setup
-![setupimg](.\images\BU03setup.JPG)
+![setupimg](images/BU03setup.JPG)
 
 The system operates in Two-Way Ranging (TWR) mode, allowing the tag to measure its distance from each anchor (on the orange boxes) without requiring clock synchronization.   
   
@@ -410,9 +410,9 @@ MULTIPLAY_IP   = "192.168.254.173"   # IP of the Multiplay machine
 MULTIPLAY_PORT = 5005                # OSC UDP port Multiplay listens on
 ```
 Next, open Multiplay>Files>Preferences  
-![multiplayPrefss](images\MultiplayPref.png)  
+![multiplayPrefss](images/MultiplayPref.png)  
 Then, open OSC Control and set the port to the corresponding port number while also enabling Control (Incoming).
-![multiplayOSCss](images\multiplayOSC.png)
+![multiplayOSCss](images/multiplayOSC.png)
 
 Next, the information for the sound cue and its threshold is defined here as a list:
 ```python

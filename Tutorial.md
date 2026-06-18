@@ -7,6 +7,8 @@ The `tutorial.py` program serves as an interactive training module for the Ghost
 
 The tutorial introduces players to the ghost hunting mechanics through a series of instructional screens and then transitions into a live practice session where players can locate and dispel ghosts using the same equipment and controls as the actual game. Unlike the main game, the tutorial does not include a countdown timer or win/lose conditions.
 
+Back to [README.md](README.md)
+
 ---
 
 ## System Components
