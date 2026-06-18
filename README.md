@@ -299,7 +299,7 @@ Stopping first guarantees no two proximity cues ever overlap, regardless of how 
 ├── tutorial.md        # 
 ├──                   # 
 └── ConfigFiles/
-    ├── bu03_detect.py         # full AT command reference
-    ├── bu03_multi_config.py   # BU03 board pinout
+    ├── bu03_detect.py         # 
+    ├── bu03_multi_config.py   # 
     ├── bu03_inspect.py
 ```
