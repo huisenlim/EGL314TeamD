@@ -227,11 +227,17 @@ In order for players to decipher where ghosts are without a screen explicitly sh
 The faster the beeping, the closer the player is.   
 Multiplay and Python OSC will be used to facilitate this mechanic in order for it to be synchronised with the game.
 
+First, the Multiplay IP address and port are defined in the game's code:
 ```python
 MULTIPLAY_IP   = "192.168.254.173"   # IP of the Multiplay machine
 MULTIPLAY_PORT = 5005                # OSC UDP port Multiplay listens on
 ```
+Next, open Multiplay>Files>Preferences
+![multiplayPrefss](images\MultiplayPref.png)  
+Then, open OSC Control and set the port to the corresponding port number while also enabling Control (Incoming).
+![multiplayOSCss](images\multiplayOSC.png)
 
+Next, the information for the sound cue and its threshold is defined here as a list:
 ```python
 SOUND_CUE_THRESHOLDS = [
     (0.0,   "/cue/4/go"),   # right on the ghost  (hit tolerance)
