@@ -132,7 +132,7 @@ Then import the library into the game file code:
 import RPi.GPIO as GPIO
 ```
 
-### Ghost dispelling mechanic
+### Ghost Dispelling Mechanic
 When Player is in the zone where the ghosts is and when button is pressed, ghosts will be dispelled.
 
 When button is pressed
