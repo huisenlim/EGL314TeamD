@@ -132,13 +132,86 @@ Then import the library into the game file code:
 import RPi.GPIO as GPIO
 ```
 
-### Ghost dispelling mechanic
+### Ghost Dispelling Mechanic
 When Player is in the zone where the ghosts is and when button is pressed, ghosts will be dispelled.
 
+When button is pressed
+``` python
+ def pin_edge_callback(channel):
+        is_pressed = not GPIO.input(channel)
+        with state.lock:
+            state.button_pressed = is_pressed
+
+            # --- FORCE IMMEDIATE DEACTIVATION ON PRESS ---
+            if is_pressed:
+                for tag_id, tag in enumerate(state.tags):
+                    if tag.filt_position is None:
+                        continue
+```
+
+And tag is in the zone where the ghosts is,
+```python
+for zi, ghost in enumerate(Ghosts):
+                        if ghost.get("active", True):
+                            # Check if this tag is inside this ghost right now
+                            if ptInGhost(tag.filt_position, ghost):
+                                print(f"\n🎯 HIT! Tag {tag_id} dispelled {ghost['label']}!")
+                                ghost["active"] = False
+```
+ghosts "zone" will be removed.
+
 ### Win Condition
-For the player to win, they must first carry a tag and the button.  
+For the player to win, they must first carry a tag (tracking device to know your location) and the button.  
 The player must both be in the vicinity of the ghost and press the button to dispel the ghost.  
 Clear all three ghosts within the allocated time to win.
+
+Firstly, identify if tag is in the zone of the ghosts.
+```python
+for zi, ghost in enumerate(Ghosts):
+                    if ghost.get("active", True):
+                        if ptInGhost(tag.filt_position, ghost):
+                            current_ghosts.add(zi)
+
+                tag.ghosts_inside = {zi for zi in current_ghosts if Ghosts[zi]["active"]}
+
+                for zi, ghost in enumerate(Ghosts):
+                    if ghost.get("active", True):
+                        is_in_zone = ptInGhost(tag.filt_position, ghost)
+```
+
+Secondly, set condition for the player to achieve to win the game.
+1. If button is pressed and tag is in the zone of the ghosts,
+```python
+ # Condition 1: Button is pressed AND tag is inside the ghost zone
+                        if state.button_pressed and is_in_zone:
+                            print(f"\n=== SUCCESS === Tag {tag_id} dispelled Ghost: {ghost['label']}!")
+                            ghost["active"] = False
+```
+ghosts will be dispelled.
+
+2. Else if button is pressed and tag is not in the zone of the ghosts,
+```python
+                        # Condition 2: Button is pressed AND tag is NOT inside the ghost zone
+                        elif state.button_pressed and not is_in_zone:
+                            pass # Ghost remains unaffected 
+```
+ghosts will remained.
+
+3. Else if button is not pressed and tag is in the zone of the ghosts,
+```python
+# Condition 3: Button is NOT pressed AND tag is inside the ghost zone
+                        elif not state.button_pressed and is_in_zone:
+                            current_ghosts.add(zi) # Ghost remains, mark as occupying zone
+```
+ghosts will remained.
+
+Lastly, after all ghosts is removed within the timeframe, player wins the game.
+```python
+# Check for Win Condition (Are all ghosts turned off?)
+                if all(not g.get("active", True) for g in Ghosts):
+                    state.game_won = True
+                    print("\n🏆 !!! CONGRATS!!! U WIN!!! ALL GHOSTS CLEARED!!! 🏆")
+```
 
 ### Lose Condition
 The game starts with a 120-second countdown timer.  
