@@ -60,7 +60,16 @@ BU03 Anchors and Tags
 ![setupimg](.\images\BU03setup.JPG)
 
 ### 2.2 Tag configuration
-In this project, a single Ai-Thinker BU03-Kit module is configured as a tag, while six other modules are configured as fixed anchors placed around the game area. The system operates in Two-Way Ranging (TWR) mode, allowing the tag to measure its distance from each anchor without requiring clock synchronization. The tag continuously exchanges UWB signals with the anchors and outputs the calculated distance measurements through its data UART connection to a Raspberry Pi. Using the known coordinates of the anchors, the Raspberry Pi performs multilateration to determine the player's real-time position within the game environment. To improve tracking accuracy, calibration offsets are applied to compensate for ranging errors, and a Kalman filter is used to smooth position data and reduce measurement noise. This setup provides reliable indoor positioning for the ghost hunting game, enabling location-based gameplay mechanics such as ghost detection and dispelling.
+In this project, a single Ai-Thinker BU03-Kit module is configured as a tag, while six other modules are configured as fixed anchors placed around the game area.  
+  
+The system operates in Two-Way Ranging (TWR) mode, allowing the tag to measure its distance from each anchor without requiring clock synchronization.   
+  
+The tag continuously exchanges UWB signals with the anchors and outputs the calculated distance measurements through its data UART connection to a Raspberry Pi.   
+  
+Using the known coordinates of the anchors, the Raspberry Pi performs multilateration to determine the player's real-time position within the game environment.   
+  
+To improve tracking accuracy, calibration offsets are applied to compensate for ranging errors, and a Kalman filter is used to smooth position data and reduce measurement noise.   
+This setup provides reliable indoor positioning for the ghost hunting game, enabling location-based gameplay mechanics such as ghost detection and dispelling.
 
 ## 3. Repository Structure
 ### 3.1 POC game code
@@ -142,7 +151,8 @@ In order for players to decipher where ghosts are without a screen explicitly sh
    
 4 different levels of beeping ranging in frequency will play depending on the distance of the player tag from the nearest ghost.   
   
-The faster the beeping, the closer the player is. Multiplay and Python OSC will be used to facilitate this mechanic in order for it to be synchronised with the game.
+The faster the beeping, the closer the player is.   
+Multiplay and Python OSC will be used to facilitate this mechanic in order for it to be synchronised with the game.
 
 ```python
 MULTIPLAY_IP   = "192.168.254.173"   # IP of the Multiplay machine
