@@ -297,3 +297,6 @@ Players can freely practise locating and dispelling ghosts.
 12. Shut down safely when the application closes.
 
 This tutorial system provides players with a guided introduction to the Ghost Hunting Game while allowing them to practise the core mechanics using the actual hardware and tracking system before starting the main gameplay experience.
+
+---
+Back to [README.md](README.md)

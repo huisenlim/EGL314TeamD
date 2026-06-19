@@ -55,4 +55,7 @@ View the step by step guide [**here**](https://github.com/huats-club/stage_track
 
 ### Anchors and Tag IDs
 During configuration, ensure that each UWB module has a Anchor/Tag ID.  
- If you find that the tracking on the viewer is not working as expected, for example tags are jittery and stick to each other, double-check that they have unique IDs.
+If you find that the tracking on the viewer is not working as expected, for example tags are jittery and stick to each other, double-check that they have unique IDs.
+
+---
+Back to [README.md](README.md)

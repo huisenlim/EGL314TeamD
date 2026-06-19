@@ -433,3 +433,7 @@ if multiplay_client and not state.game_won and not state.game_lost:
 ```
 It first checks if the game is still running by using an if statement to verify the game state is not won or lost, so that it will only send cues while the game is still running.  
 stop_all() is called inside trigger() before the new cue fires, so overlaps are impossible.
+
+
+---
+Back to [README.md](README.md)

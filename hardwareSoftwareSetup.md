@@ -139,3 +139,6 @@ Open Multiplay>Files>Preferences
 ![multiplayPrefss](images/MultiplayPref.png)  
 Then, open OSC Control and set the port to the corresponding port number while also enabling Control (Incoming).
 ![multiplayOSCss](images/multiplayOSC.png)
+
+---
+Back to [README.md](README.md)
