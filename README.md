@@ -7,7 +7,8 @@ This project has just passed the POC phase, and is documented as such.
 1. [Project Overview](#1-Project-Overview)
 2. [System Structure & Setup](#2-system-structure--setup)
 * 2.1 [Basic structure](#21-basic-structure-of-system)
-* 2.2 [Tag configuration & Setup](#22-setup-of-tags--configuration)
+* 2.2 [Software & Hardware Setup](#22-software--hardware-setup)
+* 2.3 [Tag configuration & Setup](#23-setup-of-tags--configuration)
 3. [Game code for POC](#3-poc-game-code)
     * [Base of game](#base-game)
     * [Button input](#rapberry-pi-button-input)
@@ -16,12 +17,12 @@ This project has just passed the POC phase, and is documented as such.
     * [Lose condition](#lose-condition)
     * [Proximity beeping mechanic](#proximity-beeping-mechanic)  
 * 3.1 [Tutorial](Tutorial.md)
-* 3.2 [UART data receiver file](uart.py)
-4. [Repository Layout](#repository-layout)
+4. [Running the game](#4-running-the-game)
+5. [Repository Layout](#5-repository-layout)
 
+---
 
-
-## 1. Project Overview
+# 1. Project Overview
 This project aims to create an immersive and interactive experience through a 'ghost hunting game'.  
   
 For this, the following hardware and software are used:
@@ -42,9 +43,9 @@ In order to win, the player must dispel 3 ghosts within the 2 minute time limit 
 Whenever a ghost is successfully dispelled, an additional 30 seconds is added, whereas if the button is pressed outside of the ghost's range, 5 seconds will be deducted.
 
 
-## 2. System Structure & Setup
-### 2.1 Basic structure of system
+# 2. System Structure & Setup
 
+## 2.1 Basic structure of system
 ```mermaid
 graph TD
 A[BU03 Anchor 0]--UART-->B[Receiver rPi]
@@ -56,8 +57,13 @@ G[BU03 Anchor 5] --> A
 B --OSC--> H[Game rPi]
 H --OSC--> I[Multiplay]
 ```
+## 2.2 Software & Hardware Setup
+Before we start configuring the boards, we need to do some software setup for the Raspberry Pi by activating virtual environments and installing the required dependencies along with some hardware setup to connect the button to the Raspberry Pi.
 
-### 2.2 Setup of tags & configuration
+Click [here](hardwareSoftwareSetup.md) for how.
+
+
+## 2.3 Setup of tags & configuration
 In this project, a single Ai-Thinker BU03-Kit module is configured as a tag, while six other modules are configured as fixed anchors placed around the game area. These are the fixed reference points used to calculate position.  
 
 ### Physical Setup
@@ -66,6 +72,7 @@ In this project, a single Ai-Thinker BU03-Kit module is configured as a tag, whi
 The Raspberry Pi then reads live distance data from Anchor 00 over UART and sends it to our Game rPi which performs 2D multilateration, smooths the result with a Kalman filter, and renders live positions in a Tkinter and Matplotlib GUI.  
   
 For this, each board has to be configured such that it understands its purpose and what it has to do.  
+
 To learn more about how the BU03 modules work and how they are configured, click [here](TagSetupConfig.md)
 
 
@@ -409,11 +416,8 @@ First, the Multiplay IP address and port are defined in the game's code:
 MULTIPLAY_IP   = "192.168.254.173"   # IP of the Multiplay machine
 MULTIPLAY_PORT = 5005                # OSC UDP port Multiplay listens on
 ```
-Next, open Multiplay>Files>Preferences  
-![multiplayPrefss](images/MultiplayPref.png)  
-Then, open OSC Control and set the port to the corresponding port number while also enabling Control (Incoming).
-![multiplayOSCss](images/multiplayOSC.png)
-
+*Port must correspond to what is established in Multiplay OSC Control settings.  
+ Details written in [software setup](softwareSetup.md).
 ### Establishing Multiplay cue commands and corresponding radii
 
 Next, the information for the sound cue and its threshold is defined here as a list:
@@ -499,7 +503,18 @@ if multiplay_client and not state.game_won and not state.game_lost:
 It first checks if the game is still running by using an if statement to verify the game state is not won or lost, so that it will only send cues while the game is still running.  
 stop_all() is called inside trigger() before the new cue fires, so overlaps are impossible.
 
-## Repository Layout
+# 4. Running Tutorial and Game
+To run the tutorial and game, first run uart.py on the receiver rPi using CLI:
+```
+python3 uart.py --host x.x.x.x --port 5005 --tags 1
+```
+Where x.x.x.x is the IP address of the game rPi.  
+  
+Then, simply run POCtutorial.py and GamePOC.py on the game rPi through CLI or VScode.
+
+
+
+# 5. Repository Layout
 ```
 .
 ├── README.md                  # this file
@@ -507,6 +522,8 @@ stop_all() is called inside trigger() before the new cue fires, so overlaps are 
 ├── uart.py                    # for UART receiver pi
 ├── POCtutorial.py             # Tutorial game file for POC
 ├── tutorial.md                # Tutorial game file documentation
+├── hardwareSoftwareSetup.md   # setup of hardware and software
+├── TagSetupConfig.md          # setup and configuration of tag boards
 └── ConfigFiles/               
     ├── bu03_detect.py         # UART connection confirmation
     ├── bu03_multi_config.py   # to config ID/role for each board

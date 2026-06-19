@@ -38,3 +38,4 @@ The Receiver rPi then sends the raw UART data to the Game rPi using uart.py, whi
   
 To improve tracking accuracy, calibration offsets are applied to compensate for ranging errors, and a Kalman filter is used to smooth position data and reduce measurement noise.   
 
+## Configuration of BU03 modules
