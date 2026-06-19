@@ -66,7 +66,7 @@ In this project, a single Ai-Thinker BU03-Kit module is configured as a tag, whi
 The Raspberry Pi then reads live distance data from Anchor 00 over UART and sends it to our Game rPi which performs 2D multilateration, smooths the result with a Kalman filter, and renders live positions in a Tkinter and Matplotlib GUI.  
   
 For this, each board has to be configured such that it understands its purpose and what it has to do.  
-To learn more about how, click [here](TagSetupConfig.md)
+To learn more about how the BU03 modules work and how they are configured, click [here](TagSetupConfig.md)
 
 
 
