@@ -32,7 +32,7 @@ E[BU03 Anchor 3] --> A
 F[BU03 Anchor 4] --> A
 G[BU03 Anchor 5] --> A
 B --OSC--> H[Game rPi]
-H --OSC--> I[Multiplay]
+H --OSC--> I[Multiplay ]
 ```
 The Receiver rPi then sends the raw UART data to the Game rPi using uart.py, which then uses the known coordinates of the anchors to perform multilateration to determine the player's real-time position within the game environment.   
   

@@ -137,17 +137,6 @@ self.ghost_patches = {}
 ```
 
 ## Rapberry Pi button input 
-This game requires a button input to create the ghost dispelling mechanic.   
-For that, first install the Rasberry Pi GPIO:
-  
-```
-pip install RPi.GPIO==0.7.1
-```
-Then import the library into the game file code:
-```python
-import RPi.GPIO as GPIO
-```
-
 
 ### Pin Declaration & GPIO Setup
 
@@ -411,13 +400,16 @@ In order for players to decipher where ghosts are without a screen explicitly sh
 The faster the beeping, the closer the player is.   
 Multiplay and Python OSC will be used to facilitate this mechanic in order for it to be synchronised with the game.
 
+### Multiplay Address and Port
+
 First, the Multiplay IP address and port are defined in the game's code:
 ```python
 MULTIPLAY_IP   = "192.168.254.173"   # IP of the Multiplay machine
 MULTIPLAY_PORT = 5005                # OSC UDP port Multiplay listens on
 ```
 *Port must correspond to what is established in Multiplay OSC Control settings.  
- Details written in [software setup](softwareSetup.md).
+Details written in [software setup](softwareSetup.md).
+
 ### Establishing Multiplay cue commands and corresponding radii
 
 Next, the information for the sound cue and its threshold is defined here as a list:
@@ -502,6 +494,7 @@ if multiplay_client and not state.game_won and not state.game_lost:
 ```
 It first checks if the game is still running by using an if statement to verify the game state is not won or lost, so that it will only send cues while the game is still running.  
 stop_all() is called inside trigger() before the new cue fires, so overlaps are impossible.
+
 
 # 4. Running Tutorial and Game
 To run the tutorial and game, first run uart.py on the receiver rPi using CLI:
