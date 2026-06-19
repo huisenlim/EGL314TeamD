@@ -63,13 +63,11 @@ In this project, a single Ai-Thinker BU03-Kit module is configured as a tag, whi
 ### Physical Setup
 ![setupimg](images/BU03setup.JPG)
 
-The system operates in Two-Way Ranging (TWR) mode, allowing the tag to measure its distance from each anchor (on the orange boxes) without requiring clock synchronization.   
+The Raspberry Pi then reads live distance data from Anchor 00 over UART and sends it to our Game rPi which performs 2D multilateration, smooths the result with a Kalman filter, and renders live positions in a Tkinter and Matplotlib GUI.  
   
-The tag continuously exchanges UWB signals with the anchors and outputs the calculated distance measurements through its data UART connection to a Raspberry Pi.   
-  
-Using the known coordinates of the anchors, the Raspberry Pi performs multilateration to determine the player's real-time position within the game environment.   
-  
-To improve tracking accuracy, calibration offsets are applied to compensate for ranging errors, and a Kalman filter is used to smooth position data and reduce measurement noise.   
+For this, each board has to be configured such that it understands its purpose and what it has to do.  
+To learn more about how, click [here](TagSetupConfig.md)
+
 
 
 # 3. POC game code
@@ -185,7 +183,7 @@ GPIO.cleanup()
 
 At the very end in the `finally` block, this releases the GPIO pins safely when the program closes.
 
-### Ghost Dispelling Mechanic
+## Ghost Dispelling Mechanic
 When Player is in the vicinity of a ghost and presses the button, the ghost will be dispelled.  
 
 When button is pressed
@@ -232,6 +230,7 @@ For the player to win, they must first carry the BU03 tag (a tracking device) an
 The player must both be in the vicinity of the ghost and press the button to dispel the ghost.  
 Clear all three ghosts within the allocated time to win.
 
+### Game Matrix
 Firstly, the game matrix identifies if the tag is in the ghost zone.
 ```python
 for zi, ghost in enumerate(Ghosts):
@@ -246,7 +245,8 @@ for zi, ghost in enumerate(Ghosts):
                         is_in_zone = ptInGhost(tag.filt_position, ghost)
 ```
 
-Secondly, set the condition the player has to achieve to win the game.
+Secondly, it sets the condition the player has to achieve to win the game.  
+
 1. If button is pressed and tag is in the zone of the ghosts,
 ```python
  # Condition 1: Button is pressed AND tag is inside the ghost zone
@@ -414,6 +414,8 @@ Next, open Multiplay>Files>Preferences
 Then, open OSC Control and set the port to the corresponding port number while also enabling Control (Incoming).
 ![multiplayOSCss](images/multiplayOSC.png)
 
+### Establishing Multiplay cue commands and corresponding radii
+
 Next, the information for the sound cue and its threshold is defined here as a list:
 ```python
 SOUND_CUE_THRESHOLDS = [
@@ -435,7 +437,6 @@ def nearest_ghost_distance(point):
 ```
 This is so that the code is able to discern the distance and thus which cue to play.  
 
-cue_for_distance checks if the tag is within the cue thresholds stated above, then returns the Multiplay address written in SOUND_CUE_THRESHOLDS if it is, and None if it isn't.  
 
 ```python
 def cue_for_distance(distance):
@@ -445,6 +446,9 @@ def cue_for_distance(distance):
     return None
 ```
 
+cue_for_distance checks if the tag is within the cue thresholds stated above, then returns the Multiplay address written in SOUND_CUE_THRESHOLDS if it is, and None if it isn't.  
+
+### MultiplayClient Class
 
 Within the MultiplayClient class, there are 3 functions, '__init __', 'stop_all', and 'trigger'.
 ```python
@@ -477,6 +481,9 @@ Stopping first guarantees no two proximity cues ever overlap, regardless of how 
         except Exception as exc:
             print(f"[multiplay] send failed ({address}): {exc}")
 ```
+
+### Application in Game's Matrix
+
 Within the game's main logic, these functions are applied like so:
 ```python
 if multiplay_client and not state.game_won and not state.game_lost:
@@ -490,7 +497,7 @@ if multiplay_client and not state.game_won and not state.game_lost:
         tag.last_cue = new_cue
 ```
 It first checks if the game is still running by using an if statement to verify the game state is not won or lost, so that it will only send cues while the game is still running.  
-stop_all() is called inside trigger() before the new cue fires,  so overlaps are impossible.
+stop_all() is called inside trigger() before the new cue fires, so overlaps are impossible.
 
 ## Repository Layout
 ```
