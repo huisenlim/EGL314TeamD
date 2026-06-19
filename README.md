@@ -76,7 +76,7 @@ The programming of the game for POC includes the base game mechanic of dispellin
 To view the in-depth guide on the GamePOC.py file, click [here](POCgameCode.md)
 
 # 4. Running Tutorial and Game
-To run the tutorial and game, first run uart.py on the receiver rPi using CLI:
+To run the tutorial and game, first run uart.py on the receiver rPi using CLI inside the environment created during [software setup](https://github.com/huisenlim/EGL314TeamD/blob/main/hardwareSoftwareSetup.md#installing-virtual-environment):
 ```
 python3 uart.py --host x.x.x.x --port 5005 --tags 1
 ```

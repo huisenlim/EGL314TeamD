@@ -325,7 +325,14 @@ elif self.state.game_lost:
 ## 6. Proximity beeping mechanic
 In order for players to decipher where ghosts are without a screen explicitly showing where the ghosts are, sound cues are added in order to hint at the location of the ghosts. 
    
-4 different levels of beeping ranging in frequency will play depending on the distance of the player tag from the nearest ghost.   
+4 different levels of beeping ranging in frequency will play depending on the distance of the player tag from the nearest ghost:
+
+| Distance threshold | Cue |
+| -- | -- |
+| 0.0 | Cue 4 ( Fastest) |
+| 0.25 | Cue 3 |
+| 0.625 | Cue 2 |
+| 1.0 | Cue 1 (Slowest)|
   
 The faster the beeping, the closer the player is.   
 Multiplay and Python OSC will be used to facilitate this mechanic in order for it to be synchronised with the game.
@@ -351,7 +358,9 @@ SOUND_CUE_THRESHOLDS = [
     (1.0,   "/cue/1/go"),   # far away
 ]
 ```
+
 This allows the code to be able to retrieve information for each distance from this list consistently without having to manually type it in every time.
+
 
 The function 'nearest_ghost_distance' returns the minimum distance from the tag (point) to the centre of any active ghost:
 ```python
