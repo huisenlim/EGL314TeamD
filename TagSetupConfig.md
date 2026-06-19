@@ -39,3 +39,20 @@ The Receiver rPi then sends the raw UART data to the Game rPi using uart.py, whi
 To improve tracking accuracy, calibration offsets are applied to compensate for ranging errors, and a Kalman filter is used to smooth position data and reduce measurement noise.   
 
 ## Configuration of BU03 modules
+For this project, we need 6 boards configured as anchors A00 through A05, and 1 board configured as a tag.
+
+To configure each board, this was the workflow: 
+
+Step 1: Verify UART link (bu03_detect.py)  
+Step 2: Configure each board (bu03_multi_config.py)  
+Step 3: Inspect a board's saved config (bu03_inspect.py)  
+Step 4: Calibrate per-anchor offsets (viewer_calibrate.py)  
+Step 5: Run the game (GamePOC.py)  
+
+After configuring the anchors
+
+View the step by step guide [**here**](https://github.com/huats-club/stage_tracking#step-1--verify-uart-link-bu03_detectpy).  
+
+### Anchors and Tag IDs
+During configuration, ensure that each UWB module has a Anchor/Tag ID.  
+ If you find that the tracking on the viewer is not working as expected, for example tags are jittery and stick to each other, double-check that they have unique IDs.

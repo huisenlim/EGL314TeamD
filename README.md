@@ -13,8 +13,7 @@ This project has just passed the POC phase, and is documented as such.
 * 3.1 [Tutorial](Tutorial.md)
 4. [Running the game](#4-running-the-game)
 5. [Repository Layout](#5-repository-layout)
-
----
+  
 
 # 1. Project Overview
 This project aims to create an immersive and interactive experience through a 'ghost hunting game'.  
