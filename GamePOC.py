@@ -13,11 +13,12 @@ import argparse
 import csv
 import sys
 import threading
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import time
 import tkinter as tk
 from tkinter import ttk
 from dataclasses import dataclass, field
+import random
 
 import matplotlib
 matplotlib.use("TkAgg")
@@ -49,32 +50,45 @@ VIEW_BOUNDS = (-0.50, 1.50, -0.50, 1.50)
 # ---------------------------------------------------------------------------
 GhostHitTol = 0.0  # hit tolerance
 
-Ghosts = [
-    {
-        "center": (0.25, 0.625),
-        "radius": 0.15,
-        "min_radius": 0.10,
-        "color": "#ffff00",
-        "label": "Bob",
-        "active": True,
-    },
-    {
-        "center": (0.75, 1.0),
-        "radius": 0.15,
-        "min_radius": 0.10,
-        "color": "#fff700",
-        "label": "Stewart",
-        "active": True,
-    },
-    {
-        "center": (0.75, 0.25),
-        "radius": 0.15,
-        "min_radius": 0.10,
-        "color": "#fff700",
-        "label": "Kevin",
-        "active": True,
-    },
-]
+def generate_random_ghosts(Ghosts=5):
+    names = ["Bob", "Stewart", "Kevin", "Carl", "Jerry"]
+    colors = ["#ffff00", "#00ff95", "#00e1ff", "#f088f0", "#fc9090"]
+    random_ghosts = []
+    
+    # Safe boundary padding so they stay comfortably inside the tracking field
+    PADDING_MIN = 0.15
+    PADDING_MAX = 0.85
+
+    for i in range(Ghosts):
+        while True:
+            random_x = random.uniform(PADDING_MIN, PADDING_MAX)
+            random_y = random.uniform(PADDING_MIN, PADDING_MAX)
+            
+            # Anti-overlap check: Make sure ghosts don't spawn right on top of each other
+            too_close = False
+            for existing in random_ghosts:
+                ex, ey = existing["center"]
+                distance_sq = (random_x - ex)**2 + (random_y - ey)**2
+                if distance_sq < (0.28 ** 2):  # Keep them spaced out slightly
+                    too_close = True
+                    break
+            
+            if not too_close:
+                break
+        
+        ghost_dict = {
+            "center": (random_x, random_y),
+            "radius": 0.15,
+            "min_radius": 0.10,
+            "color": colors[i % len(colors)],
+            "label": names[i % len(names)],
+            "active": True,
+        }
+        random_ghosts.append(ghost_dict)
+        
+    return random_ghosts
+
+Ghosts = generate_random_ghosts(Ghosts=5)
 
 TAG_COLORS = [
     "#ff5252", "#42a5f5", "#66bb6a", "#ffb74d",
@@ -604,11 +618,11 @@ def main():
 
     # --- RPi.GPIO EDGE DETECT INTERRUPT CALL REGISTER ---
     BUTTON_PIN = 27
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+#    GPIO.setmode(GPIO.BCM)
+#    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def pin_edge_callback(channel):
-        is_pressed = not GPIO.input(channel)
+#        is_pressed = not GPIO.input(channel)
         with state.lock:
             state.button_pressed = is_pressed
 
@@ -637,7 +651,7 @@ def main():
                     print(f"\n❌ MISS! No ghost hit — -{TIMER_PENALTY_MISS}s penalty. Remaining: {remaining:.1f}s")
 
     # 200ms software bounce filter mapping
-    GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=pin_edge_callback, bouncetime=200)
+#    GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=pin_edge_callback, bouncetime=200)
 
     anchor_ids = sorted(ANCHORS.keys())
     anchor_positions_list = [ANCHORS[i] for i in anchor_ids]
@@ -665,7 +679,7 @@ def main():
     finally:
         state.stop = True
         server.shutdown()
-        GPIO.cleanup()
+#        GPIO.cleanup()
         print("[game] System core execution pipelines deactivated safely.")
 
 if __name__ == "__main__":
