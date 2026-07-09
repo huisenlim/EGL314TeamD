@@ -29,7 +29,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from pythonosc import dispatcher as osc_dispatcher
 from pythonosc import osc_server
-from pythonosc.udp_client import SimpleUDPClient
+from pythonosc import udp_client
+import time
 
 # ---------------------------------------------------------------------------
 # Anchor layout and view config
@@ -111,22 +112,20 @@ TIMER_PENALTY_MISS   = 5     # seconds deducted on wrong button press
 
 
 # ---------------------------------------------------------------------------
-# Multiplay Sound Cue Configuration
+# Reaper Sound Cue Configuration
 # ---------------------------------------------------------------------------
-MULTIPLAY_IP   = "192.168.254.173"   # IP of the Multiplay machine
-MULTIPLAY_PORT = 5005                # OSC UDP port Multiplay listens on
+REAPER_IP   = "192.168.254.48"   # IP of the reaper machine
+REAPER_PORT = 2000                # OSC UDP port reapery listens on
 
-# Distance thresholds mapped to Multiplay cue numbers.
+# Distance thresholds mapped to reaper action command IDs.
 # Evaluated top-to-bottom; first threshold the player is WITHIN triggers that cue.
 # Distances are Euclidean metres from the tag to the nearest active ghost centre.
 SOUND_CUE_THRESHOLDS = [
-    (0.0,   "/cue/4/go"),   # right on the ghost  (hit tolerance)
-    (0.25,  "/cue/3/go"),   # very close
-    (0.625, "/cue/2/go"),   # medium range
-    (1.0,   "/cue/1/go"),   # far away
+    (0.0,   "/action/_26eeac548b183e4aaf462ccf88ee25ae"),   # right on the ghost  (hit tolerance)
+    (0.25,  "/action/_6c8e05560c9883429f2444e230571a93"),   # very close
+    (0.625, "/action/_1a0c884957eb20479daa6b1055ee2e30"),   # medium range
+    (1.0,   "/action/_5bb1638e8ee24c4785a25544c9412798"),   # far away
 ]
-# If the tag is beyond all thresholds, no cue is sent (silence / ambient).
-
 # ---------------------------------------------------------------------------
 # Trilateration Core Logic
 # ---------------------------------------------------------------------------
@@ -186,7 +185,7 @@ def nearest_ghost_distance(point):
 
 def cue_for_distance(distance):
     """
-    Map a raw Euclidean distance to a Multiplay OSC cue address.
+    Map a raw Euclidean distance to a Reaper OSC cue address.
     Returns None when the player is too far away for any cue.
     """
     for threshold, address in SOUND_CUE_THRESHOLDS:
@@ -195,36 +194,18 @@ def cue_for_distance(distance):
     return None
 
 
-class MultiplayClient:
-    """
-    Thin wrapper around pythonosc SimpleUDPClient for triggering Multiplay cues.
-    One shared instance is created at startup and re-used across all tags.
-    Thread-safe: SimpleUDPClient.send_message() is stateless per call.
-    """
+class ReaperClient:
     def __init__(self, ip: str, port: int):
-        self._client = SimpleUDPClient(ip, port)
-        print(f"[multiplay] OSC client initialised → {ip}:{port}")
-
-    def stop_all(self):
-        """Stop every currently active cue in Multiplay (/cue/all/stop)."""
-        try:
-            self._client.send_message("/cue/all/stop", [])
-            print("[multiplay] all cues stopped")
-        except Exception as exc:
-            print(f"[multiplay] stop_all failed: {exc}")
+        self._client = udp_client(ip, port)
+        print(f"[reaper] OSC client initialised → {ip}:{port}")
 
     def trigger(self, address: str):
-        """
-        Stop all active cues, then immediately fire the requested cue.
-        Stopping first guarantees no two proximity cues ever overlap,
-        regardless of how Multiplay's own looping or auto-follow is configured.
-        """
         try:
-            self._client.send_message("/cue/all/stop", [])
+            self._client.send_message("/action/1008", [])
             self._client.send_message(address, [])
-            print(f"[multiplay] stopped all → cue sent: {address}")
+            print(f"[reaper] stopped all → cue sent: {address}")
         except Exception as exc:
-            print(f"[multiplay] send failed ({address}): {exc}")
+            print(f"[reaper] send failed ({address}): {exc}")
 
 
 class Kalman2D:
@@ -270,7 +251,7 @@ class TagState:
     last_update:    float = 0.0
     kalman: Kalman2D = field(default_factory=Kalman2D)
     ghosts_inside: set = field(default_factory=set)
-    last_cue: str = None   # last Multiplay cue address sent for this tag
+    last_cue: str = None   # last reaper cue address sent for this tag
 
 
 class SharedState:
@@ -291,7 +272,7 @@ class SharedState:
 # ---------------------------------------------------------------------------
 # OSC Handler & Main Gameplay Decision Matrix
 # ---------------------------------------------------------------------------
-def make_osc_handler(state: SharedState, anchor_ids, anchor_positions_list, csv_writer=None, multiplay_client: MultiplayClient = None):
+def make_osc_handler(state: SharedState, anchor_ids, anchor_positions_list, csv_writer=None, reaper_client: ReaperClient = None):
     def handle_distances(address, *args):
         if len(args) < 9 or state.game_won or state.game_lost or state.stop:
             return
@@ -354,17 +335,17 @@ def make_osc_handler(state: SharedState, anchor_ids, anchor_positions_list, csv_
 
                 # --- PROXIMITY SOUND CUES ---
                 # Only send cues while the game is still running.
-                if multiplay_client and not state.game_won and not state.game_lost:
+                if reaper_client and not state.game_won and not state.game_lost:
                     dist = nearest_ghost_distance(tag.filt_position)
                     new_cue = cue_for_distance(dist)
                     if new_cue != tag.last_cue:
                         if new_cue is not None:
                             # stop_all() is called inside trigger() before the
                             # new cue fires, so overlaps are impossible.
-                            multiplay_client.trigger(new_cue)
+                            reaper_client.trigger(new_cue)
                         else:
                             # Tag moved out of all threshold ranges — silence.
-                            multiplay_client.stop_all()
+                            reaper_client.stop_all()
                         tag.last_cue = new_cue
 
             else:
@@ -656,11 +637,11 @@ def main():
     anchor_ids = sorted(ANCHORS.keys())
     anchor_positions_list = [ANCHORS[i] for i in anchor_ids]
 
-    # --- MULTIPLAY SOUND CUE CLIENT ---
-    multiplay = MultiplayClient(MULTIPLAY_IP, MULTIPLAY_PORT)
+    # --- REAPER SOUND CUE CLIENT ---
+    reaper = ReaperClient(REAPER_IP, REAPER_PORT)
 
     disp = osc_dispatcher.Dispatcher()
-    handler = make_osc_handler(state, anchor_ids, anchor_positions_list, multiplay_client=multiplay)
+    handler = make_osc_handler(state, anchor_ids, anchor_positions_list, reaper_client=reaper)
     disp.map("/distances", handler)
 
     server = osc_server.ThreadingOSCUDPServer(("0.0.0.0", args.port), disp)
