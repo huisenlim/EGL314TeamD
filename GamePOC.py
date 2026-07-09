@@ -13,7 +13,7 @@ import argparse
 import csv
 import sys
 import threading
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 import tkinter as tk
 from tkinter import ttk
@@ -114,8 +114,8 @@ TIMER_PENALTY_MISS   = 5     # seconds deducted on wrong button press
 # ---------------------------------------------------------------------------
 # Reaper Sound Cue Configuration
 # ---------------------------------------------------------------------------
-REAPER_IP   = "192.168.254.48"   # IP of the reaper machine
-REAPER_PORT = 2000                # OSC UDP port reapery listens on
+REAPER_IP   = "192.168.254.12"   # IP of the reaper machine
+REAPER_PORT = 8000                # OSC UDP port reapery listens on
 
 # Distance thresholds mapped to reaper action command IDs.
 # Evaluated top-to-bottom; first threshold the player is WITHIN triggers that cue.
@@ -599,11 +599,11 @@ def main():
 
     # --- RPi.GPIO EDGE DETECT INTERRUPT CALL REGISTER ---
     BUTTON_PIN = 27
-#    GPIO.setmode(GPIO.BCM)
-#    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def pin_edge_callback(channel):
-#        is_pressed = not GPIO.input(channel)
+        is_pressed = not GPIO.input(channel)
         with state.lock:
             state.button_pressed = is_pressed
 
@@ -632,7 +632,7 @@ def main():
                     print(f"\n❌ MISS! No ghost hit — -{TIMER_PENALTY_MISS}s penalty. Remaining: {remaining:.1f}s")
 
     # 200ms software bounce filter mapping
-#    GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=pin_edge_callback, bouncetime=200)
+    GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=pin_edge_callback, bouncetime=200)
 
     anchor_ids = sorted(ANCHORS.keys())
     anchor_positions_list = [ANCHORS[i] for i in anchor_ids]
@@ -660,7 +660,7 @@ def main():
     finally:
         state.stop = True
         server.shutdown()
-#        GPIO.cleanup()
+        GPIO.cleanup()
         print("[game] System core execution pipelines deactivated safely.")
 
 if __name__ == "__main__":
