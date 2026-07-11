@@ -11,8 +11,8 @@ def send_message(receiver_ip, receiver_port, address, message):
 	except:
 		print("Message not sent")
 
-PI_A_ADDR = "192.168.254.48"		# wlan ip 192.168.171.1, 48
-PORT = 2000
+PI_A_ADDR = "192.168.254.12"		# wlan ip 192.168.171.1, 48
+PORT = 8000
 
 mkr1 = "/action/40161" # Marker 1
 mkr2 = "/action/40162" # Marker 2
@@ -23,21 +23,24 @@ mkr8 = "/action/40168" # Marker 8
 play = "/action/1007" # Play
 pause = "/action/1008" # Pause
 playstop = "/action/40044" # Play Pause toggle
+cust1 = "/action/_631b3e8487885e4ca41e36bf474b840f"
+cust2 = "/action/_b14658efff2869488742ab2f27a44845"
+cust3 = "/action/_d0abf1a60bea24439898fd2d159db2a9"
+cust4 = "/action/_aa9d630d29046f4bb441abee7a7010a4"
 
 msg = float(1) 
 
 def c1():
-    send_message(PI_A_ADDR, PORT, mkr7, msg)
-    send_message(PI_A_ADDR, PORT, play, msg)
+    send_message(PI_A_ADDR, PORT, cust1, msg)
 	
 def c2():
-    send_message(PI_A_ADDR, PORT, mkr8, msg)
-    send_message(PI_A_ADDR, PORT, play, msg)
+    send_message(PI_A_ADDR, PORT, cust2, msg)
 
-c1()
-time.sleep(20)
-send_message(PI_A_ADDR, PORT, pause, msg)
-time.sleep(5)
-c2()
-time.sleep(5)
+def c3():
+    send_message(PI_A_ADDR, PORT, cust3, msg)
+    
+def c4():
+    send_message(PI_A_ADDR, PORT, cust4, msg)
+
+#time.sleep(60)
 send_message(PI_A_ADDR, PORT, pause, msg)
