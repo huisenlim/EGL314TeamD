@@ -13,7 +13,7 @@ import argparse
 import csv
 import sys
 import threading
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import time
 import tkinter as tk
 from tkinter import ttk
@@ -599,8 +599,8 @@ def main():
 
     # --- RPi.GPIO EDGE DETECT INTERRUPT CALL REGISTER ---
     BUTTON_PIN = 27
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    #GPIO.setmode(GPIO.BCM)
+    #GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def pin_edge_callback(channel):
         is_pressed = not GPIO.input(channel)
@@ -632,7 +632,7 @@ def main():
                     print(f"\n❌ MISS! No ghost hit — -{TIMER_PENALTY_MISS}s penalty. Remaining: {remaining:.1f}s")
 
     # 200ms software bounce filter mapping
-    GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=pin_edge_callback, bouncetime=200)
+    #GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=pin_edge_callback, bouncetime=200)
 
     anchor_ids = sorted(ANCHORS.keys())
     anchor_positions_list = [ANCHORS[i] for i in anchor_ids]
@@ -660,7 +660,7 @@ def main():
     finally:
         state.stop = True
         server.shutdown()
-        GPIO.cleanup()
+#        GPIO.cleanup()
         print("[game] System core execution pipelines deactivated safely.")
 
 if __name__ == "__main__":
