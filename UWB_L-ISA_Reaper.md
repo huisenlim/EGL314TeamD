@@ -18,7 +18,7 @@ This is an Anchor, which is 1 of 6 that are mounted on a 3D print above head-hei
 
 ![UWB Anchor Configuration](images/uwb_anchors.jpg)
 
-Click this link to go to the 3D print used for this documentation.
+[Click this link](YOUR_3D_PRINT_URL) to go to the 3D print used for this documentation.
 
 ---
 
@@ -45,9 +45,9 @@ Using OSC communication, the Python game system and REAPER operate as separate s
 
 The REAPER project was configured with multiple audio tracks to support the Ghost Game's proximity-based audio system. Different tracks were used for the various beeping stages and gameplay events.
 
-![REAPER Audio Tracks](images/reaper_arrangement1.png)
+![REAPER Audio Tracks](images/reaper_arrangement1.jpg)
 
-![REAPER Audio Arrangement](images/reaper_arrangement2.png)
+![REAPER Audio Arrangement](images/reaper_arrangement2.jpg)
 
 ---
 
