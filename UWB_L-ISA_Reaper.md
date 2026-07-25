@@ -18,7 +18,7 @@ This is an Anchor, which is 1 of 6 that are mounted on a 3D print above head-hei
 
 ![UWB Anchor Configuration](images/uwb_anchors.jpg)
 
-[Click this link](YOUR_3D_PRINT_URL) to go to the 3D print used for this documentation.
+[Click this link]([YOUR_3D_PRINT_URL](https://makerworld.com/en/models/2815216-heavy-duty-gravity-phone-mount-articulated-arm?from=search#profileId-3134209)) to go to the 3D print used for this documentation.
 
 ---
 
