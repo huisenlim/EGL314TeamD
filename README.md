@@ -31,7 +31,7 @@ For this, the following hardware and software are used:
 
 All this is used to create a game where players use an item equipped with a rPi, button, and tag board to find and dispel ghosts through audio and visual cues.  
 
-In order to win, the player must dispel 3 ghosts within the 2 minute time limit by entering the vicinity of the ghost and pressing the button.   
+In order to win, the player must go dispel 3 ghosts within the 2 minute time limit by entering the vicinity of the ghost and pressing the button.   
 
 Whenever a ghost is successfully dispelled, an additional 30 seconds is added, whereas if the button is pressed outside of the ghost's range, 5 seconds will be deducted.
 
