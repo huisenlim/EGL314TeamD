@@ -72,4 +72,12 @@ The 12-speaker setup helps create a more immersive environment by allowing audio
 
 #### L-ISA System Showcase
 
-![L-ISA Immersive Audio System](images/lisa_system.png)
+### L-ISA Controller Software
+
+The L-ISA Controller software was used to create and manage the surround sound experience for the Ghost Game. It allows audio sources to be positioned and controlled within a spatial sound field, enabling sound to be distributed across the 12-speaker system.
+
+Different audio configurations were saved as **snapshots**, with each snapshot representing a specific audio state or surround sound position. These snapshots could then be recalled during gameplay to change the audio experience based on the player's proximity to a ghost.
+
+For example, different snapshots were used for slow, medium, and fast ghost proximity warnings, as well as specific gameplay events such as eliminating a ghost. This allowed the surround sound environment to respond dynamically to the player's movement and actions within the game.
+
+![L-ISA Immersive Audio System](images/lisa_system.jpg)
