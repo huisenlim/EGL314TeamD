@@ -13,7 +13,7 @@ An interactive and physical game of ghost hunting where player position determin
 *  3.3 [Gun Setup](#33-gun-setup)
 4. [Software Setup](#4-software-setup)
 *  4.1 [Audio](#41-audio-cues-setup)
-*  4.2 [Lighting](#42-lighting-cues-setup)
+*  4.2 [Visual](#42-lighting-cues-setup)
 5. [Conditions For The Game](#5-conditions-for-the-game)
 *  5.1 [Win Conditions](#51-win-condition)
 *  5.2 [Lose Conditions](#52-lose-condition)
@@ -25,26 +25,36 @@ An interactive, physical ghost-hunting experience where real-world player positi
 
 
 ## 2. How The Game Works
+Players will be in an arena space which is in 536 classroom to clear ghosts("zones") across progressive waves before the countdown timer stops.
 
+#### Tutorial Phase
+* The application launches into a standby state.
+* Players complete interactive tutorial prompts to learn position-tracking and pin/button mechanics.
+
+#### Wave Progression & Area Clearing
+* Completing the tutorial initiates the master countdown timer and unmutes the venue audio system.
+* Target zones ("Ghosts") render on the arena map corresponding to the active Wave (Waves 1 through 3).
+* Players must physically move their assigned tracking tags into active target circles to clear them.
+* Listen to the audio cues and and see the visual cues which is the lightings to know where the ghosts are.
+* Clearing all target zones in the current wave automatically advances the arena to the next Wave stage.
+
+#### Win / Loss Conditions
+* **Victory:** All target zones across all waves are cleared before the countdown hits `0.0s`.
+* **Defeat:** The timer reaches `0.0s` while active targets remain uncleared.
+
+---
+
+Next we will show you how the game is setup toghether with the software.
 
 ## 3. Game Setup
-
+When setting up the game, we need some physical components to make the game work like tags and anchor, button, and lastly creating of the gun so it makes the game looks real and interesting.
 
 ### 3.1 Tag and Anchor Setup
-#### UWB Anchors and Tag
-
 The Ghost Game uses six fixed UWB anchors positioned around the play area to create a tracking zone. The anchors communicate with the UWB tag carried by the player, allowing the system to measure distances and calculate the player's real-time position within the game area.
 
 The anchors act as fixed reference points, while the tag moves with the player. By using the distance measurements between the tag and multiple anchors, the system can determine the player's location and track their movement in relation to the virtual ghosts.
 
 ### 3.2 Button Setup
-
-This section documents the physical trigger hardware (the "gun") and the game's lose condition — how they're wired together and how they behave in code.
-
----
-
-#### Button Setup
-
 The dispel trigger is a single momentary push button wired to the Raspberry Pi's GPIO, read continuously in the background and forwarded to the game laptop as an event.
 
 #### Wiring
@@ -156,7 +166,7 @@ Each gun just needs a unique `tag_id` embedded in its UART payload — the lapto
 
 
 ## 4. Software Setup
-
+Software setup is needed for audio cues and visual cues so that players will be able to hunt the ghosts by lightings and listening to the sound.
 
 ### 4.1 Audio Cues Setup
 #### Audio Cue Setup
@@ -184,12 +194,98 @@ The proximity levels are configured as follows:
 This creates a dynamic warning system where the audio becomes faster and more frequent as the player approaches the ghost. When the player reaches the critical distance or successfully interacts with the ghost, a separate ghost-hit audio cue can also be triggered.
 
 ### 4.2 Lighting Cues Setup
+The lights is used when players are in the zone of the ghosts, lights will light up so that players will know when to press the button to dispel the ghosts.
 
+It communicates with the grandMA3 console using OSC network commands over UDP.
+
+* **Network IP:** `192.168.254.252`
+* **Port:** `8080`
+* **OSC Command Path:** `/gma3/cmd`
+
+---
+
+#### Game State & Arena Lighting
+
+When the game state transitions through different phases, it triggers main global lighting looks across the arena:
+
+| Game Phase | Trigger / Action | What the Lighting Console Does | Command Used |
+| :--- | :--- | :--- | :--- |
+| **Tutorial Complete / Game Start** | Player finishes tutorial; active gameplay begins. | Turns on **Sequence 1, Cue 1.0** (Green Wash) to fill the room. | `Goto Cue 1.0 Sequence 1` |
+| **Wave 3 (Final Boss)** | Players clear Waves 1 & 2 and reach the final stage. | Starts the **Final Boss sequence**. | `Go+ Sequence 35` |
+| **Game Victory / Mission Complete** | Players clear all target zones before time runs out. | Turns off all ghost lights & final boss light, then fires the **Victory Look**. | `Off Sequence 35`<br>`Off [All Ghost Sequences]`<br>`Go+ Sequence 36` |
+
+---
+
+#### Ghost Target Spotlights
+
+When a player physically enters an active ghost's target zone inside the arena, that ghost's spotlight sequence turns **ON**. Stepping out or dispelling the ghost turns the sequence **OFF**.
+
+### Ghost Sequence Mapping Table
+
+| Target ID | Ghost Character | Target Zone Color | grandMA3 Sequence ID | Action on Walk-In | Action on Walk-Out / Dispel |
+| :---: | :--- | :--- | :---: | :--- | :--- |
+| **0** | **Bob** (Wave 1) | Yellow | `Sequence 31` | `Go+ Sequence 31` | `Off Sequence 31` |
+| **1** | **Stewart** (Wave 1) | Bright Green | `Sequence 32` | `Go+ Sequence 32` | `Off Sequence 32` |
+| **2** | **Tim** (Wave 1) | Orange | `Sequence 37` | `Go+ Sequence 37` | `Off Sequence 37` |
+| **3** | **Kevin** (Wave 2) | Cyan / Light Blue | `Sequence 34` | `Go+ Sequence 34` | `Off Sequence 34` |
+| **4** | **Carl** (Wave 2) | Pink / Purple | `Sequence 29` | `Go+ Sequence 29` | `Off Sequence 29` |
+| **5** | **Dave** (Wave 2) | Hot Pink | `Sequence 33` | `Go+ Sequence 33` | `Off Sequence 33` |
+| **6** | **Jerry** (Wave 3 / Boss) | Red / Pink | `Sequence 35` | `Go+ Sequence 35` | `Off Sequence 35` |
+
+---
+
+#### Quick Lighting Test Checklist
+
+Use this checklist to troubleshoot or verify grandMA3 setup during arena configuration:
+
+1. **Verify Network IP:** Ensure the lighting computer or console is set to static IP `192.168.254.252` and listening on Port `8080`.
+2. **Check Command Path:** Confirm the console's OSC configuration accepts command-line OSC string payloads under `/gma3/cmd`.
+3. **Manual Command Test:** Test target execution directly from the console command line:
+   * **Turn On:** `Go+ Sequence 31` (Triggers Bob's spotlight)
+   * **Turn Off:** `Off Sequence 31` (Clears Bob's spotlight)
 
 ## 5. Conditions For The Game
-
+When playing a game, there is always a need for conditions so players can either win or lose the game.
 
 ### 5.1 Win Condition
+To win the game, players must physically navigate the arena and **dispel all target ghosts across all 3 Waves** before the master countdown timer reaches zero.
+
+---
+
+#### Step-by-Step Victory Rules
+
+1. **Active Wave Tracking:**
+   * Players start at **Wave 1**.
+   * Standing inside a ghost's target zone and pressing the tag button dispels that ghost.
+   * Each time a ghost is dispelled, **+30 seconds** are added to the remaining timer as a reward.
+
+2. **Wave Progression:**
+   * Once all ghosts in the active wave are cleared, the system automatically advances to the next wave:
+     * **Wave 1 Cleared:** Progresses to Wave 2.
+     * **Wave 2 Cleared:** Progresses to Wave 3 (Final Boss Stage).
+
+3. **Final Victory Trigger:**
+   * Clearing the final ghost in **Wave 3** immediately triggers the **WIN CONDITION**.
+
+---
+
+#### Hardware & System Victory Actions
+
+The moment the final ghost is dispelled, `game_state.py` automatically executes the following actions across all connected hardware systems:
+
+| Hardware System | System Action | What Happens in the Arena |
+| :--- | :--- | :--- |
+| **Countdown Timer** | **Freezes / Stops** | The timer halts immediately to lock in the players' final completion time. |
+| **Arena Display HUD** | **Victory Banner** | Screen updates to render: `!!! WIN CONDITION ACHIEVED !!! Area Cleared!` |
+| **Stage Lighting (grandMA3)** | **Victory Look** | Extinguishes all active ghost/boss spotlights (`Off Sequence 35`) and fires the **Victory Celebration Sequence** (`Go+ Sequence 36`). |
+| **Spatial Audio (REAPER / L-ISA)** | **Mute / Audio Cue** | Triggers the final dispel snapshot, halts proximity tracking audio, and safely mutes overall track output via OSC commands. |
+
+---
+
+#### Penalty Logic
+
+> [!WARNING]
+> **Incorrect Button Presses:** Pressing the tag button while **outside** an active ghost target zone results in an immediate **5-second time penalty** deducted from the master timer.
 
 ### 5.2 Lose Condition
 
