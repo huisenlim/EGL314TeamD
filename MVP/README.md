@@ -17,20 +17,20 @@ An interactive and physical game of ghost hunting where player position determin
 6. [Final Outcome](#6-final-outcome)
 
 
-## 1. Project Overview
+### 1. Project Overview
 An interactive, physical ghost-hunting experience where real-world player position drives a live game. Players carry UWB (ultra-wideband) location tags; the system trilaterates their position in an arena, checks it against "ghost" containment zones, and reacts in real time with a live arena visualization, dynamic stage lighting (grandMA3), and spatial audio (REAPER + L-ISA). Dispelling a ghost means physically walking into its zone and pressing a handheld button at the right moment.
 
 
-## 2. How The Game Works
+### 2. How The Game Works
 
 
-## 3. Game Setup
+### 3. Game Setup
 
 
-### 3.1 Tag and Anchor Setup
+## 3.1 Tag and Anchor Setup
 
 
-### 3.2 Button Setup
+## 3.2 Button Setup
 
 
 
@@ -42,7 +42,7 @@ This section documents the physical trigger hardware (the "gun") and the game's 
 
 The dispel trigger is a single momentary push button wired to the Raspberry Pi's GPIO, read continuously in the background and forwarded to the game laptop as an event.
 
-### Wiring
+## Wiring
 
 | Pi Pin | Connection |
 |---|---|
@@ -62,7 +62,7 @@ button = Button(BUTTON_PIN, pull_up=True, bounce_time=0.2)
 - `pull_up=True` — enables the internal pull-up resistor so no external resistor is needed
 - `bounce_time=0.2` — 200ms software debounce, prevents a single physical press from registering as multiple rapid presses
 
-### Event handling
+## Event handling
 
 `gpiozero` exposes clean press/release callbacks, which are bound to a small helper that sends an OSC message to the game laptop:
 
@@ -85,18 +85,18 @@ For development without a Pi, the laptop also binds the **spacebar** to the same
 
 ---
 
-### 3.3 Gun Setup
+## 3.3 Gun Setup
 
 The "gun" is the handheld unit each player carries — it combines the **position tag** (UWB, reporting distance to anchors over UART) and the **dispel button** into one Raspberry Pi–driven transmitter. Its only job is to read hardware and forward everything to the game laptop over the network via OSC; it does no game logic itself.
 
-### Components
+## Components
 
 - Raspberry Pi (or Pi Zero, depending on form factor)
 - UWB tag module wired to the Pi's UART (`/dev/ttyS0` or `/dev/ttyUSB0`)
 - Momentary push button on GPIO 18 (see [Button Setup](#1-button-setup))
 - Wi-Fi connection to the same network as the game laptop
 
-### Configuration
+## Configuration
 
 Before deploying a gun, set these constants at the top of `pi_transmitter.py`:
 
@@ -139,7 +139,7 @@ if len(parts) >= 7:
 
 A short `time.sleep(0.01)` keeps the polling loop from pegging the CPU while still comfortably outpacing the 20Hz throttle applied on the receiving end (`network.py`).
 
-### Multiple guns
+## Multiple guns
 
 Each gun just needs a unique `tag_id` embedded in its UART payload — the laptop auto-assigns each new physical tag ID to the next free UI "slot" the first time it's seen, so no per-gun code changes are required beyond flashing/wiring the tag itself.
 
