@@ -150,6 +150,30 @@ Each gun just needs a unique `tag_id` embedded in its UART payload — the lapto
 
 
 ### 4.1 Audio Cues Setup
+### Audio Cue Setup
+
+The Ghost Game uses REAPER to provide real-time audio cues based on the player's distance from a ghost. The `reaper.py` file communicates with REAPER using OSC commands and triggers different audio markers depending on the player's proximity.
+
+Three main audio tracks are used for the proximity warning system:
+
+- **Track 12 – Fast Beep:** Used when the player is very close to the ghost.
+- **Track 13 – Medium Beep:** Used when the player is at a medium distance from the ghost.
+- **Track 14 – Slow Beep:** Used when the player is further away from the ghost.
+
+The `reaper.py` file assigns OSC actions to each of these audio cues. Track 12 is triggered using the fast beep marker, Track 13 is triggered using the medium beep marker, and Track 14 is triggered using the slow beep marker. :contentReference[oaicite:0]{index=0}
+
+The audio cue is selected automatically based on the player's minimum distance from the ghost. When the player is further away, a slow beep is triggered. As the player gets closer, the system changes to a medium and then fast beep. The warning interval also becomes shorter, causing the beeps to occur more frequently as the player approaches the ghost. :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}
+
+The proximity levels are configured as follows:
+
+| Distance from Ghost | Audio Cue | Track |
+|---|---|---|
+| More than 5 m and up to 8 m | Slow Beep | Track 14 |
+| More than 2.5 m and up to 5 m | Medium Beep | Track 13 |
+| More than 1 m and up to 2.5 m | Fast Beep | Track 12 |
+| 1 m or less | Critical Fast Beep | Track 12 |
+
+This creates a dynamic warning system where the audio becomes faster and more frequent as the player approaches the ghost. When the player reaches the critical distance or successfully interacts with the ghost, a separate ghost-hit audio cue can also be triggered.
 
 ### 4.2 Lighting Cues Setup
 
