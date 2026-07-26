@@ -97,8 +97,13 @@ The Ghost Game uses six fixed UWB anchors positioned around the play area to cre
 
 The anchors act as fixed reference points, while the tag moves with the player. By using the distance measurements between the tag and multiple anchors, the system can determine the player's location and track their movement in relation to the virtual ghosts.
 
-![UWB Anchor Configuration](images/uwb_anchors.jpg)
+This is 1 of 6 anchors positioned around the play area for a tracking zone.
+![UWB Anchor Configuration](imgAnchors&Tags/uwb_anchors.jpg)
 
+
+![UWB Anchor Configuration](imgAnchors&Tags/tag.jpg)
+
+![UWB Anchor Configuration](imgAnchors&Tags/bagtag.jpg)
 ```python
 
 ANCHORS = {
