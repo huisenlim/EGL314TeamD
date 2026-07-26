@@ -244,7 +244,7 @@ When `time_left` hits zero:
 - Once `game_lost` is `True`, `main.py`'s button handler stops processing hit detection entirely — further button presses have no effect on game state
 
 
-# 6. Final Outcome
+## 6. Final Outcome
 
  📋 Final Setup & Outcome Summary — Ghost Hunting Game
 
@@ -252,7 +252,7 @@ A wrap-up summary of the complete game setup, how a session plays out end-to-end
 
 ---
 
-### 1. Setup Overview
+### 6.1 Setup Overview
 
 | Layer | Component | Status |
 |---|---|---|
@@ -269,7 +269,7 @@ A wrap-up summary of the complete game setup, how a session plays out end-to-end
 
 ---
 
-## 2. Session Flow (Start to Finish)
+### 6.2 Session Flow (Start to Finish)
 
 1. **Launch** — `main.py` starts the OSC server, opens the arena display, and waits
 2. **Tutorial** — players complete the 4-step onboarding panel; timer stays paused (`timer_active = False`) until this finishes
@@ -279,21 +279,21 @@ A wrap-up summary of the complete game setup, how a session plays out end-to-end
 
 ---
 
-## 3. Final Outcomes
+### 6.3 Final Outcomes
 
-### 🏆 Win
+#### 🏆 Win
 - Fires when the **last ghost of wave 3** is dispelled
 - `game_won = True`, timer stops instantly at whatever time remains
 - `lighting.trigger_game_finish_light()` clears all ghost/boss sequences and triggers the **Victory** cue on grandMA3
 - Arena title switches to green: `"GAME OVER — AREA CLEARED! YOU WIN!"`
 
-### ☠️ Loss
+#### ☠️ Loss
 - Fires when `time_left` reaches `0` before all waves are cleared
 - `game_lost = True`, timer freezes at `0.0`
 - Arena title switches to red: `"MISSION FAILED — OUT OF TIME!"`
 - **No lighting or audio cue currently fires on loss** — this is the one asymmetry between the two outcomes
 
-### After either outcome
+#### After either outcome
 - Button presses stop affecting the game (`handle_button_event` checks `not game_won and not game_lost`)
 - The arena title and timer HUD simply freeze on-screen showing final state — there is no dedicated results/summary screen
 - No stats are persisted anywhere (no logging of waves cleared, hit/miss counts, or time remaining/overrun)
@@ -301,7 +301,7 @@ A wrap-up summary of the complete game setup, how a session plays out end-to-end
 
 ---
 
-## 4. Setup Checklist
+### 6.4 Setup Checklist
 
 Use this to confirm a venue is ready before a session:
 
@@ -315,12 +315,12 @@ Use this to confirm a venue is ready before a session:
 - [ ] Tutorial content reviewed and up to date (`tutorial_ui.py`)
 - [ ] `--tags` set to the correct number of players for the session
 
-## 5. Gameplay in Action
+### 6.5 Gameplay in Action
 This photo below shows the player should be positioned in gameplay holding the handheld gun (tag + button), with a mounted anchor visible behind them
 <img width="960" height="1280" alt="PLAYER" src="https://github.com/user-attachments/assets/8d15f304-98c7-4fc8-9049-d5e4943828b1" />
 
 ---
-# 6. Demo Video
+### 6.6 Demo Video
 This video recording below shows the screen recording of the game
 [MVP RECORDING.zip](https://github.com/user-attachments/files/30385286/MVP.RECORDING.zip)
 The recording below shows a screen capture of gameplay in action
