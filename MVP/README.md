@@ -123,16 +123,16 @@ The UWB tag was attached to the end of a rod, which was then placed inside a hav
 These are the some 3d print used for the mount for the anchors.
 
 These are the arms
-[Click this link](3dPrintedFiles/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
+[Click this link](3dPrintedFiles/longarms.3mf) to view the 3D print used for the UWB anchor.
 
 These are the screws
-[Click this link](3dPrintedFiles/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
+[Click this link](3dPrintedFiles/screws.3mf) to view the 3D print used for the UWB anchor.
 
 These is the clamp that holds the arms and screws together
-[Click this link](3dPrintedFiles/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
+[Click this link](3dPrintedFiles/clamp.3mf) to view the 3D print used for the UWB anchor.
 
 This is the holder that i edited on UbuntuStudios so i can drill 2 small 2.5mm imperial screws through for a strengthened and stabalised anchor
-[Click this link](3dPrintedFiles/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
+[Click this link](3dPrintedFiles/holder.3mf) to view the 3D print used for the UWB anchor.
 
 ```python
 
