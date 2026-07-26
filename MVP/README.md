@@ -18,6 +18,12 @@ An interactive and physical game of ghost hunting where player position determin
 *  5.1 [Win Conditions](#51-win-condition)
 *  5.2 [Lose Conditions](#52-lose-condition)
 6. [Final Outcome](#6-final-outcome)
+*  6.1 [Overview Setup](#61-setup-overview)
+*  6.2 [Session Flow](#62-session-flow-start-to-finish)
+*  6.3 [Outcome](#63-final-outcomes)
+*  6.4 [Checklists](#64-setup-checklist)
+*  6.5 [Gameplay In Action](#65-gameplay-in-action)
+*  6.6 [Demo](#66-demo-video)
 
 
 ## 1. Project Overview
@@ -96,6 +102,7 @@ When setting up the game, we need some physical components to make the game work
 The Ghost Game uses six fixed UWB anchors positioned around the play area to create a tracking zone. The anchors communicate with the UWB tag carried by the player, allowing the system to measure distances and calculate the player's real-time position within the game area.
 
 The anchors act as fixed reference points, while the tag moves with the player. By using the distance measurements between the tag and multiple anchors, the system can determine the player's location and track their movement in relation to the virtual ghosts.
+
 
 ![UWB Anchor Configuration](images/uwb_anchors.jpg)
 
