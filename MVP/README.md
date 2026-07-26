@@ -686,6 +686,8 @@ This photo below shows the player should be positioned in gameplay holding the h
 ### 6.6 Demo Video
 This video recording below shows the screen recording of the game
 [MVP RECORDING.zip](https://github.com/user-attachments/files/30385286/MVP.RECORDING.zip)
+
+
 The recording below shows a screen capture of gameplay in action
 https://drive.google.com/file/d/1WY7LVYyNPCTMdVvlaRalucw68OrxDq7S/view?usp=drive_link
 
