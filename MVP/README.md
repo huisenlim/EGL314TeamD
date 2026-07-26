@@ -28,7 +28,11 @@ An interactive, physical ghost-hunting experience where real-world player positi
 
 
 ## 3.1 Tag and Anchor Setup
+### UWB Anchors and Tag
 
+The Ghost Game uses six fixed UWB anchors positioned around the play area to create a tracking zone. The anchors communicate with the UWB tag carried by the player, allowing the system to measure distances and calculate the player's real-time position within the game area.
+
+The anchors act as fixed reference points, while the tag moves with the player. By using the distance measurements between the tag and multiple anchors, the system can determine the player's location and track their movement in relation to the virtual ghosts.
 
 ## 3.2 Button Setup
 
