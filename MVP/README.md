@@ -103,9 +103,25 @@ The Ghost Game uses six fixed UWB anchors positioned around the play area to cre
 
 The anchors act as fixed reference points, while the tag moves with the player. By using the distance measurements between the tag and multiple anchors, the system can determine the player's location and track their movement in relation to the virtual ghosts.
 
+<<<<<<< HEAD
 
 ![UWB Anchor Configuration](images/uwb_anchors.jpg)
+=======
+This is 1 of 6 anchors positioned around the play area for a tracking zone.
+![UWB Anchor Configuration](imgAnchors&Tags/uwb_anchors.jpg)
+>>>>>>> 2b9b80129642eb89e13bb1efcff8d93d461ae3a6
 
+This is the top view of the tag used during MVP
+
+The UWB tag was positioned at a higher level on the player to reduce the possibility of signal obstruction caused by the human body. Since the human body can interfere with or block the direct signal path between the UWB tag and the surrounding anchors, placing the tag higher provides a clearer line of sight to the anchors.
+
+This helps improve the reliability and stability of the distance measurements as the player moves around the tracking area. The higher placement also reduces the chance of the tag being obstructed by the player's body, helping the UWB system maintain more consistent tracking performance.
+
+![UWB Anchor Configuration](imgAnchors&Tags/tag.jpg)
+
+The UWB tag was attached to the end of a rod, which was then placed inside a haversack worn by the player. This setup positioned the tag higher on the player's body, helping to reduce signal obstruction caused by the human body. By elevating the tag, a clearer line of sight was maintained between the tag and the surrounding UWB anchors, improving the reliability and consistency of the tracking system during gameplay.
+
+![UWB Anchor Configuration](imgAnchors&Tags/bagtag.jpg)
 ```python
 
 ANCHORS = {
