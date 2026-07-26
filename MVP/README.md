@@ -88,8 +88,14 @@ Ghosts = setup_wave_ghosts()
 * **Victory:** All target zones across all waves are cleared before the countdown hits `0.0s`.
 * **Defeat:** The timer reaches `0.0s` while active targets remain uncleared.
 ---
+This is Wave 1.
 <img width="1280" height="960" alt="Wave 1" src="https://github.com/huisenlim/EGL314TeamD/blob/main/MVP/images/wave%201.jpg" />
 
+This is Wave 2.
+<img width="1280" height="960" alt="Wave 2" src="https://github.com/huisenlim/EGL314TeamD/blob/main/MVP/images/wave%202.jpg" />
+
+This is Wave 3 but coordinates will change everytime the code runs.
+<img width="1280" height="960" alt="Wave 3" src="https://github.com/huisenlim/EGL314TeamD/blob/main/MVP/images/wave%203.jpg" />
 
 ---
 Next we will show you how the game is setup together with the software.
@@ -367,6 +373,9 @@ def set_ghost_light(ghost_index: int, turn_on: bool):
             send_command(f"Off Sequence {seq_id}")
 
 ```
+This is a Demo how it will look like for Wave 1 and 2.
+<img width="1280" height="960" alt="Wave 1 lightings" src="https://github.com/huisenlim/EGL314TeamD/blob/main/MVP/images/wave%201%20lightings.jpg" />
+<img width="1280" height="960" alt="Wave 2 lightings" src="https://github.com/huisenlim/EGL314TeamD/blob/main/MVP/images/wave%202%20lightings.jpg" />
 
 #### Ghost Sequence Mapping Table
 
