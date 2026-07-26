@@ -123,7 +123,7 @@ The UWB tag was attached to the end of a rod, which was then placed inside a hav
 These are the some 3d print used for the mount for the anchors.
 
 These are the arms
-[Click this link](3D_Print/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
+[Click this link](3dPrintedfiles/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
 
 These are the screws
 [Click this link](3D_Print/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
