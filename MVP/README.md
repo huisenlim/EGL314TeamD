@@ -213,4 +213,82 @@ When `time_left` hits zero:
 - Once `game_lost` is `True`, `main.py`'s button handler stops processing hit detection entirely — further button presses have no effect on game state
 
 
-## 6. Final Outcome
+# 6. Final Outcome
+
+
+
+
+
+
+
+
+ 📋 Final Setup & Outcome Summary — Ghost Hunting Game
+
+A wrap-up summary of the complete game setup, how a session plays out end-to-end, and the two possible final outcomes.
+
+---
+
+## 1. Setup Overview
+
+| Layer | Component | Status |
+|---|---|---|
+| **Positioning hardware** | 6× fixed UWB anchors + per-player UWB tags | Configured via `game_logic.ANCHORS` |
+| **Player device ("gun")** | Raspberry Pi + UWB tag (UART) + push button (GPIO 18) | `pi_transmitter.py` |
+| **Network transport** | OSC over UDP, Pi → Laptop | Port `5005` (`--port`) |
+| **Position engine** | Trilateration + Kalman filter | `network.py`, `trilateration.py` |
+| **Game engine** | Wave/ghost state, hit detection, timer | `game_logic.py`, `game_state.py`, `main.py` |
+| **Spectator display** | Live arena map, tag table, timer HUD, tutorial | `display.py`, `tutorial_ui.py` |
+| **Lighting** | grandMA3 via OSC | `lighting.py` |
+| **Audio** | REAPER + L-ISA via OSC | `reaper.py` |
+
+**End-to-end flow:** UWB tags measure distance → Pi reads UART + button, forwards via OSC → laptop trilaterates position → game logic checks position against active ghost zones → display updates live → button press attempts a dispel → lighting + audio react → timer and wave state update → repeat until win or loss.
+
+---
+
+## 2. Session Flow (Start to Finish)
+
+1. **Launch** — `main.py` starts the OSC server, opens the arena display, and waits
+2. **Tutorial** — players complete the 4-step onboarding panel; timer stays paused (`timer_active = False`) until this finishes
+3. **Hunt begins** — timer starts at `150.0s`, green "wash" lighting cue fires
+4. **Wave 1 → 2 → 3** — players track ghosts via proximity beeping, walk into zones, and press the button to dispel; each successful dispel is `+30s`, each wasted press is `−5s`
+5. **Round ends** — either all 3 waves are cleared (**win**) or the timer hits `0` first (**loss**)
+
+---
+
+## 3. Final Outcomes
+
+### 🏆 Win
+- Fires when the **last ghost of wave 3** is dispelled
+- `game_won = True`, timer stops instantly at whatever time remains
+- `lighting.trigger_game_finish_light()` clears all ghost/boss sequences and triggers the **Victory** cue on grandMA3
+- Arena title switches to green: `"GAME OVER — AREA CLEARED! YOU WIN!"`
+
+### ☠️ Loss
+- Fires when `time_left` reaches `0` before all waves are cleared
+- `game_lost = True`, timer freezes at `0.0`
+- Arena title switches to red: `"MISSION FAILED — OUT OF TIME!"`
+- **No lighting or audio cue currently fires on loss** — this is the one asymmetry between the two outcomes
+
+### After either outcome
+- Button presses stop affecting the game (`handle_button_event` checks `not game_won and not game_lost`)
+- The arena title and timer HUD simply freeze on-screen showing final state — there is no dedicated results/summary screen
+- No stats are persisted anywhere (no logging of waves cleared, hit/miss counts, or time remaining/overrun)
+- Returning to a fresh round currently requires restarting the app — `game_won`, `game_lost`, `time_left`, and ghost `active` flags are not reset in-session
+
+---
+
+## 4. Setup Checklist
+
+Use this to confirm a venue is ready before a session:
+
+- [ ] All 6 anchor coordinates in `game_logic.ANCHORS` match the physical arena
+- [ ] `VIEW_BOUNDS` in `game_logic.py` covers the full playable area
+- [ ] Each gun's `LAPTOP_IP` in `pi_transmitter.py` points to the current laptop IP
+- [ ] `--port` on the laptop matches `PORT` in every gun's config
+- [ ] `GMA3_IP` / `GMA3_PORT` in `lighting.py` reachable, and `GHOST_SEQUENCES` / `FINAL_GHOST_SEQUENCE` / `GAME_OVER_SEQUENCE` match the grandMA3 show file
+- [ ] `REAPER_IP` / `LISA_IP` in `reaper.py` reachable, and marker/action IDs match the current REAPER project
+- [ ] Buttons debounced and tested on all guns (`bounce_time=0.2`)
+- [ ] Tutorial content reviewed and up to date (`tutorial_ui.py`)
+- [ ] `--tags` set to the correct number of players for the session
+
+---
