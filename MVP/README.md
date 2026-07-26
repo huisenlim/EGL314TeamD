@@ -87,9 +87,11 @@ Ghosts = setup_wave_ghosts()
 #### Win / Loss Conditions
 * **Victory:** All target zones across all waves are cleared before the countdown hits `0.0s`.
 * **Defeat:** The timer reaches `0.0s` while active targets remain uncleared.
+---
+<img width="1280" height="960" alt="Wave 1" src="https://github.com/huisenlim/EGL314TeamD/blob/main/MVP/images/wave%201.jpg" />
+
 
 ---
-
 Next we will show you how the game is setup together with the software.
 
 ## 3. Game Setup
