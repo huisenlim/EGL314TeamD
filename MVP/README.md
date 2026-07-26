@@ -139,7 +139,7 @@ These is the clamp that holds the arms and screws together
 [Click this link](3dPrintedFiles/clamp.3mf) to view the 3D print used for the UWB anchor.
 
 This is the holder that i edited on UbuntuStudios so i can drill 2 small 2.5mm imperial screws through for a strengthened and stabalised anchor
-[Click this link](3dPrintedFiles/holder.3mf) to view the 3D print used for the UWB anchor.
+ to view the 3D print used for the UWB anchor.
 
 ```python
 
@@ -208,7 +208,8 @@ These photos shows the placement of the Raspberry Pi and button
 
 ### 3.3 Gun Setup
 
-The "gun" is the handheld unit each player carries — it combines the **position tag** (UWB, reporting distance to anchors over UART) and the **dispel button** into one Raspberry Pi–driven transmitter. Its only job is to read hardware and forward everything to the game laptop over the network via OSC; it does no game logic itself.
+The "gun" is the handheld unit each player carries — it combines the **position tag** (UWB, reporting distance to anchors over UART) and the **dispel button** into one Raspberry Pi–driven transmitter. Its only job is to read hardware and forward everything to the game laptop over the network via OSC; it does no game logic itself. 
+This is the link to all the components to 3D Print for the gun [Click this link](3dPrintedFiles/MVP/3D Print Gun)
 
 #### Components
 
