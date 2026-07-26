@@ -1,3 +1,6 @@
+
+
+
 # 314 Project Phantom MVP: Final Containment(Station 4)
 An interactive and physical game of ghost hunting where player position determines real-time tracking with audio and visual cues to elimate the ghosts.
 
@@ -86,6 +89,12 @@ disp.map("/button", handle_remote_button)
 ```
 
 For development without a Pi, the laptop also binds the **spacebar** to the same event handler, so the whole game can be tested without any hardware attached.
+
+These photos shows the placement of the Raspberry Pi and button
+<img width="1280" height="960" alt="photo_6280607123523702845_y" src="https://github.com/user-attachments/assets/ba1ec894-8f6a-4f85-9494-9772722754e0" />
+<img width="1280" height="960" alt="photo_6282823279403799343_y" src="https://github.com/user-attachments/assets/4a0a47ae-b4a2-41a9-93db-e2796b59bda2" />
+
+
 
 ---
 
@@ -320,6 +329,7 @@ Use this to confirm a venue is ready before a session:
 
 ---
 # 6. Demo Video
-<video src="C:\Users\Lim Hui Sen\Downloads" controls width="720"> Your browser does not support the video tag — <a href="C:\Users\Lim Hui Sen\Downloads">download the video here</a>. </video>
+This video recording below shows the screen recording of the game
+[MVP RECORDING.zip](https://github.com/user-attachments/files/30385286/MVP.RECORDING.zip)
 
 
