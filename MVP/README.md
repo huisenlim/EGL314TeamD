@@ -1,6 +1,3 @@
-
-
-
 # 314 Project Phantom MVP: Final Containment(Station 4)
 An interactive and physical game of ghost hunting where player position determines real-time tracking with audio and visual cues to elimate the ghosts.
 
