@@ -34,9 +34,52 @@ Players will be in an arena space which is in 536 classroom to clear ghosts("zon
 #### Wave Progression & Area Clearing
 * Completing the tutorial initiates the master countdown timer and unmutes the venue audio system.
 * Target zones ("Ghosts") render on the arena map corresponding to the active Wave (Waves 1 through 3).
+* There are 3 ghosts each in wave 1 and 2 and in the final wave there is one final boss to hunt.
 * Players must physically move their assigned tracking tags into active target circles to clear them.
 * Listen to the audio cues and and see the visual cues which is the lightings to know where the ghosts are.
 * Clearing all target zones in the current wave automatically advances the arena to the next Wave stage.
+
+```python
+def setup_wave_ghosts():
+    names = ["Bob", "Stewart", "Tim", "Kevin", "Carl", "Dave", "Jerry"]
+    colors = ["#ffff00", "#00ff95", "#ff9900", "#00e1ff", "#f088f0", "#ff007f", "#fc9090"]
+    ZONE_RADIUS = 0.80 
+    
+    ghosts_list = [
+        {"center": (2.5, 6.0), "radius": ZONE_RADIUS, "min_radius": 0.10, "color": colors[0], "label": names[0], "active": True, "wave": 1},
+        {"center": (7.0, 6.0), "radius": ZONE_RADIUS, "min_radius": 0.10, "color": colors[1], "label": names[1], "active": True, "wave": 1},
+        {"center": (4.75, 3.5), "radius": ZONE_RADIUS, "min_radius": 0.10, "color": colors[2], "label": names[2], "active": True, "wave": 1},
+        {"center": (2.5, 2.5), "radius": ZONE_RADIUS, "min_radius": 0.10, "color": colors[3], "label": names[3], "active": True, "wave": 2},
+        {"center": (7.0, 2.5), "radius": ZONE_RADIUS, "min_radius": 0.10, "color": colors[4], "label": names[4], "active": True, "wave": 2},
+        {"center": (4.75, 6.0), "radius": ZONE_RADIUS, "min_radius": 0.10, "color": colors[5], "label": names[5], "active": True, "wave": 2},
+    ]
+    
+    # Generate random static coordinates for Wave 3 (Jerry)
+    while True:
+        rand_x = random.uniform(1.0, 8.5)
+        rand_y = random.uniform(1.0, 7.0)
+        too_close = False
+        for existing in ghosts_list:
+            ex, ey = existing["center"]
+            if (rand_x - ex)**2 + (rand_y - ey)**2 < (1.80 ** 2):
+                too_close = True
+                break
+        if not too_close:
+            break
+
+    ghosts_list.append({
+        "center": (rand_x, rand_y),
+        "radius": ZONE_RADIUS, 
+        "min_radius": 0.10, 
+        "color": colors[6], 
+        "label": names[6], 
+        "active": True, 
+        "wave": 3
+    })
+    return ghosts_list
+
+Ghosts = setup_wave_ghosts()
+```
 
 #### Win / Loss Conditions
 * **Victory:** All target zones across all waves are cleared before the countdown hits `0.0s`.
@@ -44,7 +87,7 @@ Players will be in an arena space which is in 536 classroom to clear ghosts("zon
 
 ---
 
-Next we will show you how the game is setup toghether with the software.
+Next we will show you how the game is setup together with the software.
 
 ## 3. Game Setup
 When setting up the game, we need some physical components to make the game work like tags and anchor, button, and lastly creating of the gun so it makes the game looks real and interesting.
@@ -53,6 +96,21 @@ When setting up the game, we need some physical components to make the game work
 The Ghost Game uses six fixed UWB anchors positioned around the play area to create a tracking zone. The anchors communicate with the UWB tag carried by the player, allowing the system to measure distances and calculate the player's real-time position within the game area.
 
 The anchors act as fixed reference points, while the tag moves with the player. By using the distance measurements between the tag and multiple anchors, the system can determine the player's location and track their movement in relation to the virtual ghosts.
+
+```python
+
+ANCHORS = {
+    0: (0.0, 0.0),
+    1: (0.0, 3.9),
+    2: (0.0, 8.16),
+    3: (9.5, 8.14),
+    4: (9.5, 3.8),
+    5: (9.5, 0.0),
+}
+
+VIEW_BOUNDS = (-1.50, 12.0, -1.50, 12.0)
+GhostHitTol = 0.25  
+```
 
 ### 3.2 Button Setup
 The dispel trigger is a single momentary push button wired to the Raspberry Pi's GPIO, read continuously in the background and forwarded to the game laptop as an event.
@@ -198,10 +256,19 @@ The lights is used when players are in the zone of the ghosts, lights will light
 
 It communicates with the grandMA3 console using OSC network commands over UDP.
 
-* **Network IP:** `192.168.254.252`
-* **Port:** `8080`
-* **OSC Command Path:** `/gma3/cmd`
-
+```python
+GMA3_IP = "192.168.254.252"   # Replace with your grandMA3 console/laptop IP address
+GMA3_PORT = 8080             # Default grandMA3 inbound OSC port
+GMA3_ADDR = "/gma3/cmd"
+```
+```python
+try:
+    client = udp_client.SimpleUDPClient(GMA3_IP, GMA3_PORT)
+    print(f"[LIGHTING] Connected to grandMA3 at {GMA3_IP}:{GMA3_PORT}")
+except Exception as e:
+    client = None
+    print(f"[LIGHTING ERROR] Failed to initialize OSC client: {e}")
+```
 ---
 
 #### Game State & Arena Lighting
@@ -214,13 +281,55 @@ When the game state transitions through different phases, it triggers main globa
 | **Wave 3 (Final Boss)** | Players clear Waves 1 & 2 and reach the final stage. | Starts the **Final Boss sequence**. | `Go+ Sequence 35` |
 | **Game Victory / Mission Complete** | Players clear all target zones before time runs out. | Turns off all ghost lights & final boss light, then fires the **Victory Look**. | `Off Sequence 35`<br>`Off [All Ghost Sequences]`<br>`Go+ Sequence 36` |
 
+```python
+def trigger_final_ghost_light():
+    """Triggers the lighting sequence for the Wave 3 Final Boss."""
+    send_command(f"Go+ Sequence {FINAL_GHOST_SEQUENCE}")
+
+def trigger_game_finish_light():
+    """
+    Kills the final boss sequence and all mapped ghost sequences,
+    then triggers the game completion sequence.
+    """
+    # 1. Kills the Final Boss sequence explicitly
+    send_command(f"Off Sequence {FINAL_GHOST_SEQUENCE}")
+    
+    # 2. Ensures all standard ghost sequences are off
+    for seq_id in GHOST_SEQUENCES.values():
+        send_command(f"Off Sequence {seq_id}")
+        
+    # 3. Triggers the Victory / Game Over Sequence
+    send_command(f"Go+ Sequence {GAME_OVER_SEQUENCE}")
+```
+
 ---
 
 #### Ghost Target Spotlights
 
 When a player physically enters an active ghost's target zone inside the arena, that ghost's spotlight sequence turns **ON**. Stepping out or dispelling the ghost turns the sequence **OFF**.
 
-### Ghost Sequence Mapping Table
+```python
+GHOST_SEQUENCES = {
+    0: 31,  # Ghost 0 (Bob)
+    1: 32,  # Ghost 1 (Stewart)
+    2: 37,  # Ghost 2 (Tim)
+    3: 34,  # Ghost 3 (Kevin)
+    4: 29,  # Ghost 4 (Carl)
+    5: 33,  # Ghost 5 (Dave)
+}
+
+def set_ghost_light(ghost_index: int, turn_on: bool):
+    """Triggers or turns off the specific Sequence mapped to a ghost."""
+    seq_id = GHOST_SEQUENCES.get(ghost_index)
+    if seq_id is not None:
+        if turn_on:
+            send_command(f"Go+ Sequence {seq_id}")
+        else:
+            send_command(f"Off Sequence {seq_id}")
+
+```
+
+#### Ghost Sequence Mapping Table
 
 | Target ID | Ghost Character | Target Zone Color | grandMA3 Sequence ID | Action on Walk-In | Action on Walk-Out / Dispel |
 | :---: | :--- | :--- | :---: | :--- | :--- |
@@ -247,6 +356,73 @@ Use this checklist to troubleshoot or verify grandMA3 setup during arena configu
 ## 5. Conditions For The Game
 When playing a game, there is always a need for conditions so players can either win or lose the game.
 
+There are 3 conditions to the game as well. Firstly, when tag is in the zone and button is pressed, the ghosts will be dispel. Secondly, when tag is not in zone but button is pressed, timer will add 5 seconds. Lastly, when tag is in zone but button is not pressed, nothing will happen.
+
+```python
+def handle_button_event(state, is_pressed):
+        with state.lock:
+            state.button_pressed = is_pressed
+            
+            # Only trigger hit detection on button PRESS down
+            if is_pressed and not state.game_won and not state.game_lost and state.timer_active:
+                hit_detected = False
+                
+                # STEP 1: Process tag hit checks for current wave ghosts
+                for tag_id, tag in enumerate(state.tags):
+                    if tag.filt_position is None:
+                        continue
+                    
+                    for zi, ghost in enumerate(game_logic.Ghosts):
+                        if ghost.get("active", True) and ghost.get("wave") == game_logic.CURRENT_WAVE:
+                            if game_logic.ptInGhost(tag.filt_position, ghost):
+                                print(f"\n🎯 DISPELLED: Tag {tag_id} hit Wave {game_logic.CURRENT_WAVE} Ghost [{ghost['label']}]!")
+                                ghost["active"] = False
+                                hit_detected = True
+                                
+                                # Turn OFF the individual light for this dispelled ghost
+                                lighting.set_ghost_light(zi, turn_on=False)
+
+                # STEP 2: Evaluate Wave Progression & Audio / Lighting Triggers
+                if hit_detected:
+                    state.time_left += 30.0
+                    
+                    # Trigger Ghost Kill sound in Reaper & L-ISA
+                    if hasattr(app, 'audio_controller'):
+                        app.audio_controller.trigger_alarm()
+                    
+                    # Check if all ghosts in the CURRENT wave are dispelled
+                    wave_cleared = all(
+                        not g.get("active", True) 
+                        for g in game_logic.Ghosts 
+                        if g.get("wave") == game_logic.CURRENT_WAVE
+                    )
+                    
+                    if wave_cleared:
+                        if game_logic.CURRENT_WAVE < 4:
+                            game_logic.CURRENT_WAVE += 1
+                            print(f"\n🌊 WAVE CLEARED! Transitioning to Wave {game_logic.CURRENT_WAVE}...")
+                            
+                            # Trigger Sequence when reaching Wave 3 (Final Boss)
+                            if game_logic.CURRENT_WAVE == 3:
+                                lighting.trigger_final_ghost_light()
+
+                            root.after(0, app.force_instant_ui_refresh)
+                        else:
+                            state.game_won = True
+                            state.timer_active = False 
+                            print("\n🏆 !!! WIN CONDITION ACHIEVED !!! All arena grid sectors cleared! 🏆")
+                            
+                            # Kills final boss light and triggers victory sequence
+                            lighting.trigger_game_finish_light()
+
+                            root.after(0, app.force_instant_ui_refresh)
+                    else:
+                        root.after(0, app.force_instant_ui_refresh)
+                else:
+                    # Penalty for pressing button without hitting a ghost
+                    state.time_left -= 5.0
+```
+
 ### 5.1 Win Condition
 To win the game, players must physically navigate the arena and **dispel all target ghosts across all 3 Waves** before the master countdown timer reaches zero.
 
@@ -259,13 +435,48 @@ To win the game, players must physically navigate the arena and **dispel all tar
    * Standing inside a ghost's target zone and pressing the tag button dispels that ghost.
    * Each time a ghost is dispelled, **+30 seconds** are added to the remaining timer as a reward.
 
+```python
+# Checks if the physical button press occurred inside an active ghost's radius
+for zi, ghost in enumerate(game_logic.Ghosts):
+    if ghost.get("active", True) and ghost.get("wave") == game_logic.CURRENT_WAVE:
+        if game_logic.ptInGhost(tag.filt_position, ghost):
+            ghost["active"] = False
+            hit_detected = True
+            lighting.set_ghost_light(zi, turn_on=False)
+
+if hit_detected:
+    state.time_left += 30.0  # +30s Reward
+```
 2. **Wave Progression:**
    * Once all ghosts in the active wave are cleared, the system automatically advances to the next wave:
      * **Wave 1 Cleared:** Progresses to Wave 2.
      * **Wave 2 Cleared:** Progresses to Wave 3 (Final Boss Stage).
 
+```python
+# Check if all ghosts in the current wave are inactive
+wave_cleared = all(
+    not g.get("active", True) 
+    for g in game_logic.Ghosts 
+    if g.get("wave") == game_logic.CURRENT_WAVE
+)
+
+if wave_cleared:
+    if game_logic.CURRENT_WAVE < 4:
+        game_logic.CURRENT_WAVE += 1
+        if game_logic.CURRENT_WAVE == 3:
+            lighting.trigger_final_ghost_light()  # Triggers Wave 3 Boss Light
+```
+
 3. **Final Victory Trigger:**
    * Clearing the final ghost in **Wave 3** immediately triggers the **WIN CONDITION**.
+
+```python
+# Triggered when Wave 3 is cleared
+else:
+    state.game_won = True
+    state.timer_active = False 
+    lighting.trigger_game_finish_light()
+```
 
 ---
 
@@ -286,6 +497,12 @@ The moment the final ghost is dispelled, `game_state.py` automatically executes 
 
 > [!WARNING]
 > **Incorrect Button Presses:** Pressing the tag button while **outside** an active ghost target zone results in an immediate **5-second time penalty** deducted from the master timer.
+
+```python
+if not hit_detected:
+    # Deduct 5 seconds if button pressed outside any target zone
+    state.time_left -= 5.0
+```
 
 ### 5.2 Lose Condition
 
