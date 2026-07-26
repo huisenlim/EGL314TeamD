@@ -1,4 +1,4 @@
-# 314 Project Phantom MVP: Final Containment(Station 4)
+# EGL314 Project Phantom MVP: The Final Showdown (Station 4)
 An interactive and physical game of ghost hunting where player position determines real-time tracking with audio and visual cues to elimate the ghosts.
 
 ## Table of contents
@@ -84,7 +84,7 @@ def setup_wave_ghosts():
 Ghosts = setup_wave_ghosts()
 ```
 
-#### Win / Loss Conditions
+#### Win / Lose Conditions
 * **Victory:** All target zones across all waves are cleared before the countdown hits `0.0s`.
 * **Defeat:** The timer reaches `0.0s` while active targets remain uncleared.
 ---
@@ -209,7 +209,9 @@ These photos shows the placement of the Raspberry Pi and button
 ### 3.3 Gun Setup
 
 The "gun" is the handheld unit each player carries — it combines the **position tag** (UWB, reporting distance to anchors over UART) and the **dispel button** into one Raspberry Pi–driven transmitter. Its only job is to read hardware and forward everything to the game laptop over the network via OSC; it does no game logic itself. 
-This is the link to all the components to 3D Print for the gun [Click this link](3dPrintedFiles/MVP/3D Print Gun)
+
+This is the link to all the components to 3D Print for the gun [3D Print Gun](./MVP/3dPrintedFiles/3D%20Print%20Gun/)
+
 
 #### Components
 
@@ -588,7 +590,7 @@ if self.state.timer_active and not self.state.game_won and not self.state.game_l
 
 This means the timer isn't purely a countdown — good play actively buys more time, so the lose condition is really "run out of misses and time before clearing all ghosts."
 
-#### On loss
+#### On lose
 
 When `time_left` hits zero:
 
@@ -648,7 +650,7 @@ A wrap-up summary of the complete game setup, how a session plays out end-to-end
 - `lighting.trigger_game_finish_light()` clears all ghost/boss sequences and triggers the **Victory** cue on grandMA3
 - Arena title switches to green: `"GAME OVER — AREA CLEARED! YOU WIN!"`
 
-#### ☠️ Loss
+#### ☠️ Lose
 - Fires when `time_left` reaches `0` before all waves are cleared
 - `game_lost = True`, timer freezes at `0.0`
 - Arena title switches to red: `"MISSION FAILED — OUT OF TIME!"`
