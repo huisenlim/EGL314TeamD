@@ -689,6 +689,62 @@ This video recording below shows the screen recording of the game
 The recording below shows a screen capture of gameplay in action
 https://drive.google.com/file/d/1WY7LVYyNPCTMdVvlaRalucw68OrxDq7S/view?usp=drive_link
 
+### 7. Repository Structure
+```
+EGL314TeamD/
+└── MVP/
+    ├── 3dPrintedFiles/
+    │   └── 3D Print Gun/
+    ├── GhostGameSoundV1/
+    ├── GhostGameSound/
+    ├── GhostGame/
+    ├── UWB&Reaper/
+    ├── images/
+    ├── imgAnchors&Tags/
+    └── README.md
+```
+
+### 8. System Architecture
+```mermaid
+graph TD
+    %% 1. Top Level Hardware & Sensor Node
+    A[AI Thinker UWB Kit] -->|UART| B[Sensor Pi -> uart.py]
+    
+    %% 2. Core Game Logic Node
+    B -->|OSC| C[Laptop -> game.py]
+    
+    %% 3. Subsystem Split
+    C -->|OSC| D[REAPER]
+    C -->|OSC| E[GrandMA3]
+    
+    %% 4. Lighting Subsystem
+    E -->|Wireless DMX| F[Lighting Fixtures]
+    
+    %% 5. Audio Subsystem Pipeline
+    D -->|Dry digital audio| G[L-ISA Processor]
+    H[L-ISA Controller] -->|Control data| G
+    G -->|Rendered audio via Dante| I[Yamaha QL1]
+    I -->|Dante| J[Yamaha Amplifier]
+    J -->|Amplified analog audio| K[Yamaha Speakers]
+
+    %% Styling & Customizations
+    style A fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+    style B fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+    style C fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+    style D fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+    style E fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+    style F fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+    style G fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+    style H fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+    style I fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+    style J fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+    style K fill:#1f2937,stroke:#6b7280,stroke-width:1px,color:#fff
+
+    linkStyle default stroke:#9ca3af,stroke-width:1px,color:#9ca3af
+```
+
+
+
 
 
 
