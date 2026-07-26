@@ -171,7 +171,6 @@ The proximity levels are configured as follows:
 | More than 5 m and up to 8 m | Slow Beep | Track 14 |
 | More than 2.5 m and up to 5 m | Medium Beep | Track 13 |
 | More than 1 m and up to 2.5 m | Fast Beep | Track 12 |
-| 1 m or less | Critical Fast Beep | Track 12 |
 
 This creates a dynamic warning system where the audio becomes faster and more frequent as the player approaches the ghost. When the player reaches the critical distance or successfully interacts with the ghost, a separate ghost-hit audio cue can also be triggered.
 
