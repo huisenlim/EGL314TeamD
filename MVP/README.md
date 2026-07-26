@@ -319,3 +319,7 @@ Use this to confirm a venue is ready before a session:
 - [ ] `--tags` set to the correct number of players for the session
 
 ---
+# 6. Demo Video
+<video src="C:\Users\Lim Hui Sen\Downloads" controls width="720"> Your browser does not support the video tag — <a href="C:\Users\Lim Hui Sen\Downloads">download the video here</a>. </video>
+
+
