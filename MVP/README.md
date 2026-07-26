@@ -255,9 +255,6 @@ When `time_left` hits zero:
 
 
 
-
-
-
  📋 Final Setup & Outcome Summary — Ghost Hunting Game
 
 A wrap-up summary of the complete game setup, how a session plays out end-to-end, and the two possible final outcomes.
@@ -327,9 +324,18 @@ Use this to confirm a venue is ready before a session:
 - [ ] Tutorial content reviewed and up to date (`tutorial_ui.py`)
 - [ ] `--tags` set to the correct number of players for the session
 
+## 5. Gameplay in Action
+This photo below shows the player should be positioned in gameplay holding the handheld gun (tag + button), with a mounted anchor visible behind them
+<img width="960" height="1280" alt="PLAYER" src="https://github.com/user-attachments/assets/8d15f304-98c7-4fc8-9049-d5e4943828b1" />
+
 ---
 # 6. Demo Video
 This video recording below shows the screen recording of the game
 [MVP RECORDING.zip](https://github.com/user-attachments/files/30385286/MVP.RECORDING.zip)
+The recording below shows a screen capture of gameplay in action
+https://drive.google.com/file/d/1WY7LVYyNPCTMdVvlaRalucw68OrxDq7S/view?usp=drive_link
+
+
+
 
 
