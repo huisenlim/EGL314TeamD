@@ -119,6 +119,21 @@ This helps improve the reliability and stability of the distance measurements as
 The UWB tag was attached to the end of a rod, which was then placed inside a haversack worn by the player. This setup positioned the tag higher on the player's body, helping to reduce signal obstruction caused by the human body. By elevating the tag, a clearer line of sight was maintained between the tag and the surrounding UWB anchors, improving the reliability and consistency of the tracking system during gameplay.
 
 ![UWB Anchor Configuration](imgAnchors&Tags/bagtag.jpg)
+
+These are the some 3d print used for the mount for the anchors.
+
+These are the arms
+[Click this link](3D_Print/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
+
+These are the screws
+[Click this link](3D_Print/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
+
+These is the clamp that holds the arms and screws together
+[Click this link](3D_Print/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
+
+This is the holder that i edited on UbuntuStudios so i can drill 2 small 2.5mm imperial screws through for a strengthened and stabalised anchor
+[Click this link](3D_Print/UWB_Anchor_Mount.3mf) to view the 3D print used for the UWB anchor.
+
 ```python
 
 ANCHORS = {
