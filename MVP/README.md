@@ -20,36 +20,34 @@ An interactive and physical game of ghost hunting where player position determin
 6. [Final Outcome](#6-final-outcome)
 
 
-### 1. Project Overview
+## 1. Project Overview
 An interactive, physical ghost-hunting experience where real-world player position drives a live game. Players carry UWB (ultra-wideband) location tags; the system trilaterates their position in an arena, checks it against "ghost" containment zones, and reacts in real time with a live arena visualization, dynamic stage lighting (grandMA3), and spatial audio (REAPER + L-ISA). Dispelling a ghost means physically walking into its zone and pressing a handheld button at the right moment.
 
 
-### 2. How The Game Works
+## 2. How The Game Works
 
 
-### 3. Game Setup
+## 3. Game Setup
 
 
-## 3.1 Tag and Anchor Setup
-### UWB Anchors and Tag
+### 3.1 Tag and Anchor Setup
+#### UWB Anchors and Tag
 
 The Ghost Game uses six fixed UWB anchors positioned around the play area to create a tracking zone. The anchors communicate with the UWB tag carried by the player, allowing the system to measure distances and calculate the player's real-time position within the game area.
 
 The anchors act as fixed reference points, while the tag moves with the player. By using the distance measurements between the tag and multiple anchors, the system can determine the player's location and track their movement in relation to the virtual ghosts.
 
-## 3.2 Button Setup
-
-
+### 3.2 Button Setup
 
 This section documents the physical trigger hardware (the "gun") and the game's lose condition — how they're wired together and how they behave in code.
 
 ---
 
-## 1. Button Setup
+#### Button Setup
 
 The dispel trigger is a single momentary push button wired to the Raspberry Pi's GPIO, read continuously in the background and forwarded to the game laptop as an event.
 
-## Wiring
+#### Wiring
 
 | Pi Pin | Connection |
 |---|---|
@@ -69,7 +67,7 @@ button = Button(BUTTON_PIN, pull_up=True, bounce_time=0.2)
 - `pull_up=True` — enables the internal pull-up resistor so no external resistor is needed
 - `bounce_time=0.2` — 200ms software debounce, prevents a single physical press from registering as multiple rapid presses
 
-## Event handling
+#### Event handling
 
 `gpiozero` exposes clean press/release callbacks, which are bound to a small helper that sends an OSC message to the game laptop:
 
@@ -94,22 +92,20 @@ These photos shows the placement of the Raspberry Pi and button
 <img width="1280" height="960" alt="photo_6280607123523702845_y" src="https://github.com/user-attachments/assets/ba1ec894-8f6a-4f85-9494-9772722754e0" />
 <img width="1280" height="960" alt="photo_6282823279403799343_y" src="https://github.com/user-attachments/assets/4a0a47ae-b4a2-41a9-93db-e2796b59bda2" />
 
-
-
 ---
 
-## 3.3 Gun Setup
+### 3.3 Gun Setup
 
 The "gun" is the handheld unit each player carries — it combines the **position tag** (UWB, reporting distance to anchors over UART) and the **dispel button** into one Raspberry Pi–driven transmitter. Its only job is to read hardware and forward everything to the game laptop over the network via OSC; it does no game logic itself.
 
-## Components
+#### Components
 
 - Raspberry Pi (or Pi Zero, depending on form factor)
 - UWB tag module wired to the Pi's UART (`/dev/ttyS0` or `/dev/ttyUSB0`)
 - Momentary push button on GPIO 18 (see [Button Setup](#1-button-setup))
 - Wi-Fi connection to the same network as the game laptop
 
-## Configuration
+#### Configuration
 
 Before deploying a gun, set these constants at the top of `pi_transmitter.py`:
 
@@ -124,7 +120,7 @@ BUTTON_PIN = 18
 
 > ⚠️ `LAPTOP_IP` is a placeholder — it must be updated to the actual laptop IP before each session, since it can change between networks/venues.
 
-### Runtime behavior
+#### Runtime behavior
 
 On startup, the gun opens a serial connection to the UWB tag and an OSC client pointed at the laptop:
 
@@ -152,7 +148,7 @@ if len(parts) >= 7:
 
 A short `time.sleep(0.01)` keeps the polling loop from pegging the CPU while still comfortably outpacing the 20Hz throttle applied on the receiving end (`network.py`).
 
-## Multiple guns
+#### Multiple guns
 
 Each gun just needs a unique `tag_id` embedded in its UART payload — the laptop auto-assigns each new physical tag ID to the next free UI "slot" the first time it's seen, so no per-gun code changes are required beyond flashing/wiring the tag itself.
 
@@ -163,7 +159,7 @@ Each gun just needs a unique `tag_id` embedded in its UART payload — the lapto
 
 
 ### 4.1 Audio Cues Setup
-### Audio Cue Setup
+#### Audio Cue Setup
 
 The Ghost Game uses REAPER to provide real-time audio cues based on the player's distance from a ghost. The `reaper.py` file communicates with REAPER using OSC commands and triggers different audio markers depending on the player's proximity.
 
@@ -196,11 +192,10 @@ This creates a dynamic warning system where the audio becomes faster and more fr
 ### 5.1 Win Condition
 
 ### 5.2 Lose Condition
-### 5.3 Lose Condition
 
 The game is lost if the countdown timer reaches zero before every ghost in all three waves has been dispelled.
 
-### Timer mechanics
+#### Timer mechanics
 
 The timer lives in shared game state and only starts counting once the tutorial is completed:
 
@@ -223,7 +218,7 @@ if self.state.timer_active and not self.state.game_won and not self.state.game_l
         self.state.timer_active = False
 ```
 
-### What affects the clock
+#### What affects the clock
 
 | Action | Effect |
 |---|---|
@@ -232,7 +227,7 @@ if self.state.timer_active and not self.state.game_won and not self.state.game_l
 
 This means the timer isn't purely a countdown — good play actively buys more time, so the lose condition is really "run out of misses and time before clearing all ghosts."
 
-### On loss
+#### On loss
 
 When `time_left` hits zero:
 
@@ -251,17 +246,13 @@ When `time_left` hits zero:
 
 # 6. Final Outcome
 
-
-
-
-
  📋 Final Setup & Outcome Summary — Ghost Hunting Game
 
 A wrap-up summary of the complete game setup, how a session plays out end-to-end, and the two possible final outcomes.
 
 ---
 
-## 1. Setup Overview
+### 1. Setup Overview
 
 | Layer | Component | Status |
 |---|---|---|
