@@ -169,6 +169,8 @@ def play_no_button(self, on_finish_callback=None):
 
 ```
 When tag is not in the zone(correct answer), lightings will turn red and audio will play a "laughing" sound coming out of the bossman and audio will replay the question when no button is pressed.
+
+This is the yes and no button.
 <img width="1280" height="960" alt="button" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/Question%201.jpg" />
 
 
@@ -224,6 +226,8 @@ def end_game_lighting_cleanup():
 
 ```
 Once end game button is pressed, it will stop all cues both lighting and audio.
+
+This is the end game button.
 <img width="1280" height="960" alt="End Game" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/End%20Game.jpg" />
 
 
