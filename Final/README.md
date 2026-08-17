@@ -20,7 +20,7 @@ An interactive and physical game of ghost hunting where player need to answer qu
 This station consists of players if they are paying attention to the trainers(host). Players have to answer 4 questions, after one correct answer the energy will be restored slowly until the last question is answered correctly, they will be able to defeat the final ghosts(bossman). The system tracks participants across defined arena zones and synchronizes stage lighting and multi-track audio to deliver a guided 4-question interactive game.
 
 This is bossman:)
-<img width="1280" height="960" alt="bossman" src="C:\Users\daris\OneDrive\Documents\GitHub\EGL314TeamD\Final\images\bossman.jpg" />
+<img width="1280" height="960" alt="bossman" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/images/bossman.jpg" />
 
 
 ## 2. How The Game Works
@@ -42,6 +42,8 @@ def ptInGhost(point, ghost):
 
 ```
 To detect if tag is in zone.
+<img width="1280" height="960" alt="tag in zone" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/Question%202.jpg" />
+
 
 ---
 
@@ -107,7 +109,18 @@ self.marker_timer.start()
 
 ```
 When pressed start game question 1 will be played audio and lighting will sync together when the bossman is saying the options. It will be the same until the last question is played.
-<img width="1280" height="960" alt="Question1" src="C:\Users\daris\OneDrive\Documents\GitHub\EGL314TeamD\Final\UI images\Question 1.jpg" />
+
+This is Q1.
+<img width="1280" height="960" alt="Question1" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/Question%201.jpg" />
+
+This is Q2.
+<img width="1280" height="960" alt="Question2" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/Question%202.jpg" />
+
+This is Q3.
+<img width="1280" height="960" alt="Question3" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/Question%203.jpg" />
+
+This is Q4.
+<img width="1280" height="960" alt="Question4" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/Question%204.jpg" />
 
 
 ---
@@ -153,7 +166,7 @@ def play_no_button(self, on_finish_callback=None):
 
 ```
 When tag is not in the zone(correct answer), lightings will turn red and audio will play a "laughing" sound coming out of the bossman and audio will replay the question when no button is pressed.
-<img width="1280" height="960" alt="button" src="C:\Users\daris\OneDrive\Documents\GitHub\EGL314TeamD\Final\UI images\First run.jpg" />
+<img width="1280" height="960" alt="button" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/First%20run.jpg" />
 
 
 ---
@@ -208,7 +221,7 @@ def end_game_lighting_cleanup():
 
 ```
 Once end game button is pressed, it will stop all cues both lighting and audio.
-<img width="1280" height="960" alt="End Game" src="C:\Users\daris\OneDrive\Documents\GitHub\EGL314TeamD\Final\UI images\End Game.jpg" />
+<img width="1280" height="960" alt="End Game" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/End%20Game.jpg" />
 
 
 ---
