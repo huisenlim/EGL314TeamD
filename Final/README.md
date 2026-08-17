@@ -76,6 +76,9 @@ if app and hasattr(app, 'audio_controller'):
     app.audio_controller.play_q1_intro()
 
 ```
+When first run the code.
+<img width="1280" height="960" alt="first run" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/First%20run.jpg" />
+
 
 * **Timed Lighting Cues (`lighting.py`)**:
 Schedules dynamic cue progression across sequences 93–96:
@@ -166,7 +169,7 @@ def play_no_button(self, on_finish_callback=None):
 
 ```
 When tag is not in the zone(correct answer), lightings will turn red and audio will play a "laughing" sound coming out of the bossman and audio will replay the question when no button is pressed.
-<img width="1280" height="960" alt="button" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/First%20run.jpg" />
+<img width="1280" height="960" alt="button" src="https://github.com/huisenlim/EGL314TeamD/blob/main/Final/UI%20images/Question%201.jpg" />
 
 
 ---
