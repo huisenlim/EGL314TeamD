@@ -276,27 +276,55 @@ Software setup is needed for audio cues and visual cues so that players will be 
 ### 4.1 Audio Cues Setup
 #### Audio Cue Setup
 
-The Ghost Game uses REAPER to provide real-time audio cues based on the player's distance from a ghost. The `reaper.py` file communicates with REAPER using OSC commands and triggers different audio markers depending on the player's proximity.
+## 🛠️ 1. REAPER OSC Configuration
 
-Three main audio tracks are used for the proximity warning system:
+To allow Python to trigger audio markers over UDP:
 
-- **Track 12 – Fast Beep:** Used when the player is very close to the ghost.
-- **Track 13 – Medium Beep:** Used when the player is at a medium distance from the ghost.
-- **Track 14 – Slow Beep:** Used when the player is further away from the ghost.
+1. Open REAPER.
+2. Go to **Options** > **Preferences** (`Ctrl+P` / `Cmd+,`).
+3. Under **Control/OSC/web**, click **Add**.
+4. Configure:
+   - **Control surface mode:** `OSC (Open Sound Control)`
+   - **Pattern config:** `Default`
+   - **Mode:** `Receive on UDP port`
+   - **Listen port:** `8000`
+5. Click **OK** and **Apply**.
 
-The `reaper.py` file assigns OSC actions to each of these audio cues. Track 12 is triggered using the fast beep marker, Track 13 is triggered using the medium beep marker, and Track 14 is triggered using the slow beep marker. :contentReference[oaicite:0]{index=0}
+---
 
-The audio cue is selected automatically based on the player's minimum distance from the ghost. When the player is further away, a slow beep is triggered. As the player gets closer, the system changes to a medium and then fast beep. The warning interval also becomes shorter, causing the beeps to occur more frequently as the player approaches the ghost. :contentReference[oaicite:1]{index=1} :contentReference[oaicite:2]{index=2}
+## 📌 2. REAPER Track & Marker Mapping
 
-The proximity levels are configured as follows:
+Question triggers route through **Track 3**, while game events route through **Tracks 33–36**:
 
-| Distance from Ghost | Audio Cue | Track |
-|---|---|---|
-| More than 5 m and up to 8 m | Slow Beep | Track 14 |
-| More than 2.5 m and up to 5 m | Medium Beep | Track 13 |
-| More than 1 m and up to 2.5 m | Fast Beep | Track 12 |
+| Track | Event / Scenario | Marker ID | Action |
+| :--- | :--- | :---: | :--- |
+| **Track 3** | Question 1 Audio | **20** | `Q1 Start / Cue` |
+| **Track 3** | Question 2 Audio | **25** | `Q2 Start / Cue` |
+| **Track 3** | Question 3 Audio | **26** | `Q3 Start / Cue` |
+| **Track 3** | Question 4 Audio | **27** | `Q4 Start / Cue` |
+| **Track 33** | Miss the Ghost | **21** | `Miss Sound Effect` |
+| **Track 34** | Hit the Ghost | **22** | `Hit Sound Effect` |
+| **Track 35** | Ghost Lose / Defeated | **23** | `Ghost Defeat Music` |
+| **Track 36** | Victory Song | **24** | `Victory Fanfare` |
 
-This creates a dynamic warning system where the audio becomes faster and more frequent as the player approaches the ghost. When the player reaches the critical distance or successfully interacts with the ghost, a separate ghost-hit audio cue can also be triggered.
+---
+
+## 💡 3. Audio & Lighting Synchronization Matrix
+
+When an event triggers in Python, it dispatches OSC messages to both REAPER (`127.0.0.1:8000`) and grandMA3 (`192.168.254.252:8080`):
+
+| Game Event | REAPER Track | REAPER Marker | grandMA3 Sequence |
+| :--- | :---: | :---: | :--- |
+| **Question 1** | Track 3 | Marker 20 | Sequence `93` |
+| **Question 2** | Track 3 | Marker 25 | Sequence `94` |
+| **Question 3** | Track 3 | Marker 26 | Sequence `95` |
+| **Question 4** | Track 3 | Marker 27 | Sequence `96` |
+| **Miss Ghost** | Track 33 | Marker 21 | Sequence `103` |
+| **Hit Ghost** | Track 34 | Marker 22 | Sequence `104` |
+| **Ghost Defeated** | Track 35 | Marker 23 | Sequence `105` |
+| **Victory Song** | Track 36 | Marker 24 | Sequence `106` |
+
+---
 
 ### 4.2 Lighting Cues Setup
 The lights is used when players are in the zone of the ghosts, lights will light up so that players will know when to press the button to dispel the ghosts.
