@@ -242,6 +242,13 @@ For software both audio and lighting need to sync with each other to obtain the 
 ### 4.1 Audio Cues Setup
 
 ### 4.2 Lighting Cues Setup
+The lighting module is responsible for sending Open Sound Control (OSC) commands directly to a grandMA3 console. It manages the visual atmosphere of the Interactive Question Arena by triggering specific light sequences, timed cues, and macros dynamically based on the active game state.
+
+## Network Configuration
+The module uses Python's `pythonosc.udp_client` to establish a one-way UDP connection with the grandMA3 console. 
+*   **Console IP:** `192.168.254.252`
+*   **Target Port:** `8080` (Default grandMA3 inbound OSC port)
+*   **Command Address:** `/gma3/cmd`
 
 
 ## 5. Conditions For The Game
@@ -252,6 +259,19 @@ To win the game, players must answer all 4 question correctly in order to defeat
 #### Audio Part
 
 #### Lighting Part
+Sequence & Cue Mappings
+Specific grandMA3 sequences are mapped to global game events[cite: 14]:
+*   **Startup State:** Sequence `100` (automatically triggers Cue 2 upon application launch)[cite: 14].
+*   **Tutorial Mode:** Sequence `91`[cite: 14].
+*   **Incorrect Action (NO Button):** Sequence `97` (plays for exactly 5 seconds before a background thread automatically turns it off)[cite: 14].
+*   **End Game / Final Dimmer:** Sequence `102` (specifically Cue 9)[cite: 14].
+
+### Question & Success Sequences
+Each of the 4 progressive game questions utilizes a dedicated introductory sequence and a corresponding success sequence upon clearance[cite: 14]:
+*   **Question 1:** Intro Sequence `93` ➔ Success Sequence `86`.
+*   **Question 2:** Intro Sequence `94` ➔ Success Sequence `87`.
+*   **Question 3:** Intro Sequence `95` ➔ Success Sequence `88`.
+*   **Question 4 (Boss Stage):** Intro Sequence `96` ➔ Success Sequence `89`.
 
 ### 5.2 Lose Condition
 Players will only lose when they get the answer wrong but they can try again until they get it right.
