@@ -235,6 +235,11 @@ This is the end game button.
 
 ## 3. Game Setup
 ### 3.1 Equipment used
+| Item | Qty | Remarks |
+| --- | --- | --- |
+| BU03-Kit UWB modules | 10 | 6 anchors and 4 tags. |
+| Laptop | 1 | for running game code, and another for receiving UWB data through UART.  |
+
 
 
 ## 4. Software Setup
