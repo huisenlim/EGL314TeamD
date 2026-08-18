@@ -316,6 +316,47 @@ Use this checklist to verify that all Open Sound Control (OSC) commands from the
 - [ ] **End Game:** Click the **END GAME** button.
   - *Expected Console Action:* Pending timers are cancelled.
   - *Expected Console Action:* Triggers `Go+ Cue 9 Sequence 102` to bring the arena to its final resting state.
+     
+  
+### 4.4 grandMA3 OSC Configuration Guide
+To allow the Python game server to communicate with the grandMA3 console, you must configure the console to receive incoming Open Sound Control (OSC) network commands. 
+
+### 1. Network Session Verification
+Before configuring OSC, ensure your console or onPC software is active within a network session.
+*   Navigate to the **Network** menu.
+*   Verify that your station is actively in a session (indicated by the green highlight in the station list).
+
+<img width="1918" height="1017" alt="OSC LIGHT NETWORK SESSION" src="https://github.com/user-attachments/assets/5f7154fa-003b-46d6-a53f-fe77d5e3b432" />
+
+
+### 2. OSC In & Out Configuration
+The core communication settings are established in the OSC Input/Output menu.
+
+Navigate to the **In & Out** menu and select the **OSC** tab on the left sidebar.
+
+Configure the global OSC settings at the top of the screen:
+*   **Interface:** Select the network interface that matches your local network IP (e.g., `Wi-Fi (192.168.254.252)`).
+*   **Enable Output:** Ensure this button is toggled ON (highlighted in yellow).
+*   **Enable Input:** Ensure this button is toggled ON (highlighted in yellow) to allow the console to listen for commands.
+
+### 3. OSC Data Setup
+Create a new OSC Data row (e.g., `OSCData 1`) in the main window and apply the following specific configuration parameters:
+
+*   **Destination IP:** `192.168.254.252`
+*   **Mode:** `UDP`
+*   **Port:** `8080` (This must match the `GMA3_PORT` defined in your Python script)
+*   **Prefix:** `gma3` (This acts as the root address block for incoming commands)
+
+Ensure the following command toggles are enabled for this data row:
+*   **Receive:** `Yes`
+*   **Send:** `Yes`
+*   **Receive Command:** `Yes` (Crucial for allowing remote execution of macros and sequences)
+*   **Send Command:** `Yes`
+
+
+
+<img width="1918" height="1027" alt="OSC LIGHT" src="https://github.com/user-attachments/assets/5fec0cc7-f408-4843-bda4-3da3d611d717" />
+
 
 
 
