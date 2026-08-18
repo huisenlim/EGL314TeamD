@@ -508,7 +508,25 @@ For the final boss stage (Question 4), a special delayed lighting and audio tran
 *   **`end_game_lighting_cleanup()`:** Safely shuts down pending timers and triggers Cue 9 on Sequence `102` to dim the physical arena when the game session fully terminates.
 
 
+## 📁 Repository Layout
 
+The project is divided into the main host server scripts (which run the game engine, UI, and OSC integrations) and a lightweight hardware script intended for the Raspberry Pi.
+
+```text
+📦 EGL314TeamD
+├── 📜 README.md             # Main project documentation
+├── 🖥️ Host Server (Laptop/PC)
+│   ├── 📜 main.py           # Central execution script; initializes UI and servers
+│   ├── 📜 display.py        # Tkinter game dashboard and real-time visualization
+│   ├── 📜 game_logic.py     # Defines anchor coordinates, play bounds, and zone logic
+│   ├── 📜 game_state.py     # Thread-safe data classes managing player positions
+│   ├── 📜 network.py        # OSC handler that throttles and processes UWB packets
+│   ├── 📜 trilateration.py  # 2D positioning math and Kalman filter for smoothing
+│   ├── 📜 tutorial_ui.py    # Dedicated UI module for player onboarding
+│   ├── 📜 lighting.py       # grandMA3 integration for dynamic lighting cues
+│   └── 📜 reaper.py         # REAPER DAW integration for automated audio mixing
+└── 🍓 Raspberry Pi (Hardware)
+    └── 📜 pi_transmitter.py # Reads UART sensor data and GPIO button presses via OSC
 
 
 ### 8. System Architecture
