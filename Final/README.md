@@ -260,14 +260,14 @@ To win the game, players must answer all 4 question correctly in order to defeat
 
 #### Lighting Part
 Sequence & Cue Mappings
-Specific grandMA3 sequences are mapped to global game events[cite: 14]:
-*   **Startup State:** Sequence `100` (automatically triggers Cue 2 upon application launch)[cite: 14].
-*   **Tutorial Mode:** Sequence `91`[cite: 14].
-*   **Incorrect Action (NO Button):** Sequence `97` (plays for exactly 5 seconds before a background thread automatically turns it off)[cite: 14].
-*   **End Game / Final Dimmer:** Sequence `102` (specifically Cue 9)[cite: 14].
+Specific grandMA3 sequences are mapped to global game events:
+*   **Startup State:** Sequence `100` (automatically triggers Cue 2 upon application launch).
+*   **Tutorial Mode:** Sequence `91`.
+*   **Incorrect Action (NO Button):** Sequence `97` (plays for exactly 5 seconds before a background thread automatically turns it off).
+*   **End Game / Final Dimmer:** Sequence `102` (specifically Cue 9).
 
 ### Question & Success Sequences
-Each of the 4 progressive game questions utilizes a dedicated introductory sequence and a corresponding success sequence upon clearance[cite: 14]:
+Each of the 4 progressive game questions utilizes a dedicated introductory sequence and a corresponding success sequence upon clearance:
 *   **Question 1:** Intro Sequence `93` ➔ Success Sequence `86`.
 *   **Question 2:** Intro Sequence `94` ➔ Success Sequence `87`.
 *   **Question 3:** Intro Sequence `95` ➔ Success Sequence `88`.
@@ -285,3 +285,20 @@ After defeating the final ghost(bossman), victory is served and trainees would b
 #### Audio Part
 
 #### Lighting Part
+## Core Logic & Functions
+
+## `start_question_lighting(q_num)`
+Clears any active lighting timers to prevent cue overlap, activates the target question's intro sequence, and schedules the staggered timed cues required for that specific question.
+
+## `trigger_question_success_light(q_num, audio_controller)`
+Executed when players successfully conquer a containment field. It cancels any pending intro cues, turns off the active question sequence, and immediately activates the corresponding success sequence. 
+
+### The Boss Transition Logic (Question 4)
+When Question 4 is cleared, the system executes a complex, threaded chain of audio-visual events to conclude the hunt:
+1.  **Phase 1:** Sequence `101` fires, accompanied by Track 34 Marker 22 audio playback.
+2.  **Phase 2 (9s Delay):** The system triggers Cue 9 on Sequence `102` (Final Dimmer) while simultaneously triggering the track fade-out audio marker.
+3.  **Phase 3 (11s Delay):** Once the audio fade finishes, Sequence `89` is turned off, Macro `15` is executed, and the final concluding audio marker plays.
+
+### Cleanup Utilities
+*   **`cancel_active_cue_timers()`:** A safety utility that iterates through `active_cue_timers` and stops them, ensuring overlapping button presses don't cause late-firing cues.
+*   **`end_game_lighting_cleanup()`:** Safely shuts down pending timers and triggers Cue 9 on Sequence `102` to dim the physical arena when the game session fully terminates.
