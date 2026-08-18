@@ -244,11 +244,33 @@ For software both audio and lighting need to sync with each other to obtain the 
 ### 4.2 Lighting Cues Setup
 The lighting module is responsible for sending Open Sound Control (OSC) commands directly to a grandMA3 console. It manages the visual atmosphere of the Interactive Question Arena by triggering specific light sequences, timed cues, and macros dynamically based on the active game state.
 
-## Network Configuration
-The module uses Python's `pythonosc.udp_client` to establish a one-way UDP connection with the grandMA3 console. 
-*   **Console IP:** `192.168.254.252`
-*   **Target Port:** `8080` (Default grandMA3 inbound OSC port)
-*   **Command Address:** `/gma3/cmd`
+```python
+# ───────── GMA3 NETWORK CONFIGURATION ─────────
+GMA3_IP = "192.168.254.252"   # Replace with your grandMA3 console IP
+GMA3_PORT = 8080             # Default grandMA3 inbound OSC port
+GMA3_ADDR = "/gma3/cmd"
+# ─────────────────────────────────────────────
+```
+
+```python
+try:
+    client = udp_client.SimpleUDPClient(GMA3_IP, GMA3_PORT)
+    print(f"[LIGHTING] Connected to grandMA3 at {GMA3_IP}:{GMA3_PORT}")
+except Exception as e:
+    client = None
+    print(f"[LIGHTING ERROR] Failed to initialize OSC client: {e}")
+```
+
+To execute these actions on the console, a helper function converts string commands into raw OSC messages:
+```python
+def send_command(cmd_string: str):
+    """Sends a raw command string to the grandMA3 command line."""
+    if client:
+        try:
+            client.send_message(GMA3_ADDR, cmd_string)
+        except Exception as err:
+            print(f"[LIGHTING ERROR] Network send failed: {err}")
+```
 
 
 ## 5. Conditions For The Game
@@ -265,13 +287,40 @@ Specific grandMA3 sequences are mapped to global game events:
 *   **Tutorial Mode:** Sequence `91`.
 *   **Incorrect Action (NO Button):** Sequence `97` (plays for exactly 5 seconds before a background thread automatically turns it off).
 *   **End Game / Final Dimmer:** Sequence `102` (specifically Cue 9).
+The game dynamically triggers specific grandMA3 sequences and timed cues based on player actions and UI events.
 
-### Question & Success Sequences
+System Startup
+When the application first launches, it triggers a baseline environmental lighting state.
+```python
+def trigger_initial_startup_light():
+    """Runs Cue 2 on Sequence 100 upon application launch."""
+    print("[LIGHTING] App Launched: Triggering Cue 2 on Sequence 100...")
+    send_command(f"Go+ Cue 2 Sequence {STARTUP_SEQUENCE}")
+```
+
+#### Question & Success Sequences
 Each of the 4 progressive game questions utilizes a dedicated introductory sequence and a corresponding success sequence upon clearance:
 *   **Question 1:** Intro Sequence `93` ➔ Success Sequence `86`.
 *   **Question 2:** Intro Sequence `94` ➔ Success Sequence `87`.
 *   **Question 3:** Intro Sequence `95` ➔ Success Sequence `88`.
 *   **Question 4 (Boss Stage):** Intro Sequence `96` ➔ Success Sequence `89`.
+
+  
+When a player physically enters an active Question Zone and successfully clicks YES, the system turns off the introductory sequence and fires a success sequence. 
+```python
+def trigger_question_success_light(q_num: int, audio_controller=None):
+    """
+    Cancels pending intro cues, turns OFF question sequence (93-96), 
+    and runs corresponding success sequence (86-89).
+    """
+    cancel_active_cue_timers()  # Stop any intro cues from firing late
+    
+    seq_info = QUESTION_SEQUENCES.get(q_num)
+    if seq_info:
+        send_command(f"Off Sequence {seq_info['question_seq']}")
+        send_command(f"Go+ Sequence {seq_info['success_seq']}")
+```
+
 
 ### 5.2 Lose Condition
 Players will only lose when they get the answer wrong but they can try again until they get it right.
@@ -286,6 +335,22 @@ When the **NO** button is clicked, the system triggers `trigger_no_button_sequen
 *   **Trigger:** The system sends a `Go+ Sequence 97` command to the grandMA3 console.
 *   **Duration:** This sequence plays a specific error lighting state for exactly 5 seconds.
 *   **Reset:** A background thread automatically sends an `Off Sequence 97` command after the 5 seconds have elapsed. Following this, the audio and lighting intros for the current question are automatically repeated so the player can try again.
+
+
+```python
+def trigger_no_button_sequence():
+    """Plays Sequence 97 for 5 seconds when NO is pressed, then turns it off."""
+    print("[LIGHTING] NO Button Pressed: Triggering Sequence 97 for 5 seconds...")
+    send_command(f"Go+ Sequence {NO_BUTTON_SEQUENCE}")
+    
+    # Schedule automatic OFF after 5 seconds
+    threading.Timer(5.0, _stop_no_button_sequence).start()
+
+def _stop_no_button_sequence():
+    """Helper timer callback to turn OFF Sequence 97."""
+    print("[LIGHTING] 5s elapsed: Turning OFF Sequence 97...")
+    send_command(f"Off Sequence {NO_BUTTON_SEQUENCE}")
+```
 
 
 ## 6. Final Outcome
@@ -313,6 +378,20 @@ Defeating the final ghost (Question 4) triggers a specialized, multi-phase grand
 2.  **9-Second Delay:** The system waits 9 seconds before automatically triggering Cue 9 on Sequence `102` (Final Dimmer fade).
 3.  **11-Second Delay:** After 11 more seconds, the system turns OFF Sequence `89` and executes Macro `15` to conclude the visual experience.
 
+For the final boss stage (Question 4), a special delayed lighting and audio transition sequence is triggered using threading.
+```python
+    # --- Special Transition Logic for Question 4 / Sequence 89 ---
+    if q_num == 4:
+        print("[LIGHTING] Q4 Cleared: Seq 89 active! Playing Track 34 Marker 22...")
+        send_command("Go+ Sequence 101")
+        
+        # Step 1: Play Track 34 Marker 22 when Sequence 89 starts
+        if audio_controller:
+            audio_controller.play_yes_q1_to_q3()
+
+        # Step 2: Hold for 9s before triggering Cue 9 on Sequence 102
+        threading.Timer(9.0, _q4_fade_seq102, args=(audio_controller,)).start()
+```
 ### Cleanup Utilities
 *   **`cancel_active_cue_timers()`:** A safety utility that iterates through `active_cue_timers` and stops them, ensuring overlapping button presses don't cause late-firing cues.
 *   **`end_game_lighting_cleanup()`:** Safely shuts down pending timers and triggers Cue 9 on Sequence `102` to dim the physical arena when the game session fully terminates.
