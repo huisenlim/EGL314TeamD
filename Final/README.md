@@ -271,6 +271,56 @@ def send_command(cmd_string: str):
         except Exception as err:
             print(f"[LIGHTING ERROR] Network send failed: {err}")
 ```
+### 4.3 Lighting Setup Checklist
+Use this checklist to verify that all Open Sound Control (OSC) commands from the Python game server are successfully reaching the grandMA3 console and triggering the correct sequences.
+
+## 1. Network & Initialization
+- [ ] **Network Connection:** Verify the grandMA3 console is set to IP `192.168.254.252` and listening for OSC on UDP port `8080`.
+- [ ] **Application Launch:** Run `python main.py`. 
+  - *Expected Console Action:* Triggers `Go+ Cue 2 Sequence 100`.
+  - *Visual Check:* Baseline environmental startup lighting is active.
+
+## 2. UI & Pre-Game States
+- [ ] **Tutorial Mode:** Click **START TUTORIAL**.
+  - *Expected Console Action:* Triggers `Go+ Sequence 91`.
+- [ ] **Game Start Initialization:** Click **START GAME**.
+  - *Expected Console Action:* Sends `Off Sequence 100` and `Off Sequence 91`.
+  - *Expected Console Action:* Immediately triggers `Go+ Sequence 93` (Question 1 Intro).
+
+## 3. Question Intros & Timed Cues
+- [ ] **Staggered Cues (Stage 1):** While Question 1 is active, do not press any buttons for 20 seconds.
+  - *Expected Console Action:* Automatically triggers Cues 1, 2, 3, and 4 on Sequence `93` at the 6s, 10s, 14s, and 18s marks.
+
+## 4. Game Action Responses
+- [ ] **Lose Condition (NO Button):** Click **NO**.
+  - *Expected Console Action:* Triggers `Go+ Sequence 97`.
+  - *Expected Console Action:* Wait exactly 5 seconds; system should automatically send `Off Sequence 97`.
+- [ ] **Win Condition (YES Button):** Physically enter the Question 1 zone and click **YES**.
+  - *Expected Console Action:* Turns `Off Sequence 93`.
+  - *Expected Console Action:* Triggers Success `Go+ Sequence 86`.
+- [ ] **Stage Progression (CONTINUE Button):** Click **CONTINUE**.
+  - *Expected Console Action:* Turns `Off Sequence 86`.
+  - *Expected Console Action:* Triggers the next stage intro `Go+ Sequence 94`.
+
+## 5. Final Boss Sequence (Question 4)
+- [ ] **Boss Win Trigger:** Reach Question 4, enter the zone, and click **YES**.
+  - *Expected Console Action:* Turns `Off Sequence 96`.
+  - *Expected Console Action:* Triggers `Go+ Sequence 89` and `Go+ Sequence 101` simultaneously.
+- [ ] **Boss Fade (9s Delay):** Wait 9 seconds after the boss win.
+  - *Expected Console Action:* System automatically triggers `Go+ Cue 9 Sequence 102`.
+- [ ] **Boss Conclusion (11s Delay):** Wait another 11 seconds (20s total).
+  - *Expected Console Action:* Turns `Off Sequence 89`.
+  - *Expected Console Action:* Executes `Go Macro 15`.
+
+## 6. System Shutdown
+- [ ] **End Game:** Click the **END GAME** button.
+  - *Expected Console Action:* Pending timers are cancelled.
+  - *Expected Console Action:* Triggers `Go+ Cue 9 Sequence 102` to bring the arena to its final resting state.
+
+
+
+
+
 
 
 ## 5. Conditions For The Game
