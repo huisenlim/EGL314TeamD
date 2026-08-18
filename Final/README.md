@@ -443,6 +443,21 @@ def _stop_no_button_sequence():
     send_command(f"Off Sequence {NO_BUTTON_SEQUENCE}")
 ```
 
+### 5.3 Output of game
+
+These images show the output of the lighting effect of the game
+Question 1
+<img width="1280" height="960" alt="Q1" src="https://github.com/user-attachments/assets/ac26230d-3ac1-410a-b665-b51e5268ff4a" />
+Question 2
+<img width="1280" height="960" alt="Q2" src="https://github.com/user-attachments/assets/28de1823-b393-4746-bebe-1643c9ca0df7" />
+Question 3
+<img width="1280" height="960" alt="Q3" src="https://github.com/user-attachments/assets/8e9d88b4-2226-4918-a2ab-560d41c67e2b" />
+Question 4
+
+<img width="1280" height="960" alt="Q4" src="https://github.com/user-attachments/assets/1b2b9f71-4cef-42f2-8912-20c22d34b255" />
+
+
+
 
 ## 6. Final Outcome
 After defeating the final ghost(bossman), victory is served and trainees would be able to obtain their license to become a trainer.
