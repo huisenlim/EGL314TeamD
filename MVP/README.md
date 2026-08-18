@@ -276,7 +276,7 @@ Software setup is needed for audio cues and visual cues so that players will be 
 ### 4.1 Audio Cues Setup
 #### Audio Cue Setup
 
-# 🛠️ 1. REAPER OSC Configuration
+##### 🛠️ 1. REAPER OSC Configuration
 
 To allow Python to trigger audio markers over UDP:
 
@@ -292,7 +292,7 @@ To allow Python to trigger audio markers over UDP:
 
 ---
 
-# 📌 2. REAPER Track & Marker Mapping
+##### 📌 2. REAPER Track & Marker Mapping
 
 Question triggers route through **Track 3**, while game events route through **Tracks 33–36**:
 
@@ -309,7 +309,7 @@ Question triggers route through **Track 3**, while game events route through **T
 
 ---
 
-# 💡 3. Audio & Lighting Synchronization Matrix
+##### 💡 3. Audio & Lighting Synchronization Matrix
 
 When an event triggers in Python, it dispatches OSC messages to both REAPER (`127.0.0.1:8000`) and grandMA3 (`192.168.254.252:8080`):
 
