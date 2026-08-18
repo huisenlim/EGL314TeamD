@@ -278,6 +278,14 @@ Players will only lose when they get the answer wrong but they can try again unt
 #### Audio Part
 
 #### Lighting Part
+## ❌ Lose Condition (Incorrect Action)
+
+A lose or incorrect condition occurs when a player clicks the **NO** button on the game dashboard. This is used to indicate an incorrect answer or action, temporarily halting the current hunt.
+
+When the **NO** button is clicked, the system triggers `trigger_no_button_sequence()`:
+*   **Trigger:** The system sends a `Go+ Sequence 97` command to the grandMA3 console.
+*   **Duration:** This sequence plays a specific error lighting state for exactly 5 seconds.
+*   **Reset:** A background thread automatically sends an `Off Sequence 97` command after the 5 seconds have elapsed. Following this, the audio and lighting intros for the current question are automatically repeated so the player can try again.
 
 
 ## 6. Final Outcome
@@ -298,6 +306,12 @@ When Question 4 is cleared, the system executes a complex, threaded chain of aud
 1.  **Phase 1:** Sequence `101` fires, accompanied by Track 34 Marker 22 audio playback.
 2.  **Phase 2 (9s Delay):** The system triggers Cue 9 on Sequence `102` (Final Dimmer) while simultaneously triggering the track fade-out audio marker.
 3.  **Phase 3 (11s Delay):** Once the audio fade finishes, Sequence `89` is turned off, Macro `15` is executed, and the final concluding audio marker plays.
+
+### 👑 Final Boss Win (Question 4)
+Defeating the final ghost (Question 4) triggers a specialized, multi-phase grandMA3 lighting transition to signify the end of the game:
+1.  **Initial Clear:** Turns OFF Sequence `96`, triggers Success Sequence `89`, and simultaneously fires Sequence `101`.
+2.  **9-Second Delay:** The system waits 9 seconds before automatically triggering Cue 9 on Sequence `102` (Final Dimmer fade).
+3.  **11-Second Delay:** After 11 more seconds, the system turns OFF Sequence `89` and executes Macro `15` to conclude the visual experience.
 
 ### Cleanup Utilities
 *   **`cancel_active_cue_timers()`:** A safety utility that iterates through `active_cue_timers` and stops them, ensuring overlapping button presses don't cause late-firing cues.
