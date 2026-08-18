@@ -527,6 +527,7 @@ The project is divided into the main host server scripts (which run the game eng
 │   └── 📜 reaper.py         # REAPER DAW integration for automated audio mixing
 └── 🍓 Raspberry Pi (Hardware)
     └── 📜 pi_transmitter.py # Reads UART sensor data and GPIO button presses via OSC
+```
 
 
 ### 8. System Architecture
