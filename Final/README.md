@@ -245,7 +245,55 @@ This is the end game button.
 ## 4. Software Setup
 For software both audio and lighting need to sync with each other to obtain the perfect game.
 ### 4.1 Audio Cues Setup
+#### 🛠️ 1. REAPER OSC Configuration
 
+To allow Python to trigger audio markers over UDP:
+
+1. Open REAPER.
+2. Go to **Options** > **Preferences** (`Ctrl+P` / `Cmd+,`).
+3. Under **Control/OSC/web**, click **Add**.
+4. Configure:
+   - **Control surface mode:** `OSC (Open Sound Control)`
+   - **Pattern config:** `Default`
+   - **Mode:** `Receive on UDP port`
+   - **Listen port:** `8000`
+5. Click **OK** and **Apply**.
+
+---
+
+#### 📌 2. REAPER Track & Marker Mapping
+
+Question triggers route through **Track 3**, while game events route through **Tracks 33–36**:
+
+| Track | Event / Scenario | Marker ID | Action |
+| :--- | :--- | :---: | :--- |
+| **Track 3** | Question 1 Audio | **20** | `Q1 Start / Cue` |
+| **Track 3** | Question 2 Audio | **25** | `Q2 Start / Cue` |
+| **Track 3** | Question 3 Audio | **26** | `Q3 Start / Cue` |
+| **Track 3** | Question 4 Audio | **27** | `Q4 Start / Cue` |
+| **Track 33** | Miss the Ghost | **21** | `Miss Sound Effect` |
+| **Track 34** | Hit the Ghost | **22** | `Hit Sound Effect` |
+| **Track 35** | Ghost Lose / Defeated | **23** | `Ghost Defeat Music` |
+| **Track 36** | Victory Song | **24** | `Victory Fanfare` |
+
+---
+
+#### 💡 3. Audio & Lighting Synchronization Matrix
+
+When an event triggers in Python, it dispatches OSC messages to both REAPER (`127.0.0.1:8000`) and grandMA3 (`192.168.254.252:8080`):
+
+| Game Event | REAPER Track | REAPER Marker | grandMA3 Sequence |
+| :--- | :---: | :---: | :--- |
+| **Question 1** | Track 3 | Marker 20 | Sequence `93` |
+| **Question 2** | Track 3 | Marker 25 | Sequence `94` |
+| **Question 3** | Track 3 | Marker 26 | Sequence `95` |
+| **Question 4** | Track 3 | Marker 27 | Sequence `96` |
+| **Miss Ghost** | Track 33 | Marker 21 | Sequence `103` |
+| **Hit Ghost** | Track 34 | Marker 22 | Sequence `104` |
+| **Ghost Defeated** | Track 35 | Marker 23 | Sequence `105` |
+| **Victory Song** | Track 36 | Marker 24 | Sequence `106` |
+
+---
 ### 4.2 Lighting Cues Setup
 The lighting module is responsible for sending Open Sound Control (OSC) commands directly to a grandMA3 console. It manages the visual atmosphere of the Interactive Question Arena by triggering specific light sequences, timed cues, and macros dynamically based on the active game state.
 
